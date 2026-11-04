@@ -6,8 +6,10 @@ const nextConfig: NextConfig = {
   // Static export (output: "export") lets the whole editor run from any static host or CDN; the API is optional.
   output: process.env.NEXT_STATIC_EXPORT ? "export" : undefined,
   basePath: basePath || undefined,
-  trailingSlash: true,
+  trailingSlash: !!process.env.NEXT_STATIC_EXPORT,
   images: { unoptimized: true },
+  // Same-origin API proxy for single-port hosting and previews: set API_PROXY=http://localhost:4000 and NEXT_PUBLIC_API_URL=/api
+  async rewrites() { const t = process.env.API_PROXY; return t ? [{ source: "/api/:path*", destination: `${t}/:path*` }] : []; },
   transpilePackages: ["@saturn/model", "@saturn/geometry", "@saturn/analyses", "@saturn/realtime"],
   reactStrictMode: true,
   webpack: (config, { isServer }) => {

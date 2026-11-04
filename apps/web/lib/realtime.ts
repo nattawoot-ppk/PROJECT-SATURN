@@ -17,7 +17,8 @@ export function goLive(projectId: string, me: { id: string; name: string }) {
   leaveLive();
   const token = getToken(); if (!token) { useLive.getState().set({ error: "sign in first" }); return; }
   doc = new Y.Doc();
-  const wsUrl = API_URL.replace(/^http/, "ws") + "/rt"; // y-websocket appends /<room>
+  const base = API_URL.startsWith("/") ? window.location.origin + API_URL : API_URL;
+  const wsUrl = base.replace(/^http/, "ws") + "/rt"; // y-websocket appends /<room>
   provider = new WebsocketProvider(wsUrl, projectId, doc, { params: { token } });
   const aw = provider.awareness;
   aw.setLocalState({ id: me.id, name: me.name, color: colorFor(me.id), selected: useEditor.getState().selectedId, option: useEditor.getState().project?.active_option_id } satisfies Presence);

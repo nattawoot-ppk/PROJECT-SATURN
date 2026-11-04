@@ -37,7 +37,7 @@ export default function NewProject() {
       try { const r = await fetchOsmContext(origin, radius); project.site.context_buildings = r.buildings; project.site.streets = r.streets; }
       catch (e) { setBusy(`Context fetch failed (${(e as Error).message}); continuing without context.`); await new Promise((r) => setTimeout(r, 1200)); }
     }
-    saveProject(project); router.push(`/project/?id=${id}`);
+    saveProject(project); router.push(`/project?id=${id}`);
   };
 
   return (

@@ -48,7 +48,7 @@ interface EditorState {
 export const activeOption = (p: Project | null): DesignOption | null =>
   p ? (p.options.find((o) => o.id === p.active_option_id) ?? p.options[0] ?? null) : null;
 
-const palette = ["#4f8cff", "#ff9f43", "#2ed573", "#a55eea", "#ff6b81", "#1dd1a1", "#feca57"];
+const palette = ["#e3e6ea", "#c9ced6", "#f0e6dc", "#d7dde6", "#e8ddd0", "#cfd6de", "#ece9e4"];
 
 export const useEditor = create<EditorState>((set, get) => ({
   project: null, selectedId: null, tool: "select", draft: [], hover: null, past: [], future: [],

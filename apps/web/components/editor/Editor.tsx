@@ -2,6 +2,7 @@
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { MousePointer2, Pentagon, Square, LandPlot, Undo2, Redo2, Download, ArrowLeft, Camera, ChevronDown } from "lucide-react";
 import { useEditor, activeOption, type Tool } from "@/lib/store";
 import { KpiPanel, CompliancePanel, ZoningPanel, BuildingPanel, OptionsPanel, SitePanel, useDerived } from "./Panels";
 import { exportObj } from "@/lib/export/obj";
@@ -9,14 +10,15 @@ import { exportDxf } from "@/lib/export/dxf";
 import { exportExcel } from "@/lib/export/excel";
 import { download } from "@/lib/download";
 import AnalysisBar from "./AnalysisBar";
+import { Btn, Chip, IconBtn, Segmented } from "@/components/ui";
 
-const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => <div className="flex h-full items-center justify-center text-slate-500">Loading 3D…</div> });
+const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => <div className="flex h-full items-center justify-center text-ink-3">Loading 3D…</div> });
 
-const tools: Array<{ id: Tool; label: string; key: string }> = [
-  { id: "select", label: "Select / move", key: "V" },
-  { id: "draw-polygon", label: "Draw polygon building", key: "P" },
-  { id: "draw-rect", label: "Draw rectangle building", key: "R" },
-  { id: "draw-parcel", label: "Draw parcel", key: "L" },
+const tools: Array<{ id: Tool; label: string; key: string; icon: React.ReactNode }> = [
+  { id: "select", label: "Select / move", key: "V", icon: <MousePointer2 size={16} /> },
+  { id: "draw-polygon", label: "Draw polygon building", key: "P", icon: <Pentagon size={16} /> },
+  { id: "draw-rect", label: "Draw rectangle building", key: "R", icon: <Square size={16} /> },
+  { id: "draw-parcel", label: "Draw parcel", key: "L", icon: <LandPlot size={16} /> },
 ];
 
 export default function Editor() {
@@ -44,57 +46,57 @@ export default function Editor() {
 
   if (!project || !d) return null;
   const opt = d.opt; const safe = project.name.replace(/[^A-Za-z0-9_-]+/g, "_");
-  const panels: Array<{ id: typeof panel; label: string; badge?: string }> = [
-    { id: "kpi", label: "KPIs" },
-    { id: "compliance", label: "Checks", badge: d.compliance.errors ? String(d.compliance.errors) : undefined },
-    { id: "zoning", label: "Zoning" },
-    { id: "building", label: "Building" },
-    { id: "options", label: "Options" },
-    { id: "site", label: "Site" },
+  const snapshot = () => { const c = document.querySelector("canvas") as HTMLCanvasElement | null; if (!c) return; c.toBlob((b) => b && download(`${safe}-${opt.name}.png`, b)); };
+  const panels = [
+    { id: "kpi" as const, label: "KPIs" }, { id: "compliance" as const, label: "Checks", badge: d.compliance.errors ? String(d.compliance.errors) : undefined },
+    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" },
   ];
   return (
-    <div className="flex h-screen flex-col bg-slate-950 text-slate-100">
-      <header className="flex h-12 items-center gap-3 border-b border-slate-800 px-3">
-        <Link href="/" className="text-sm text-slate-400 hover:text-white">← Projects</Link>
-        <input className="bg-transparent text-sm font-semibold focus:outline-none" value={project.name} onChange={(e) => mutate((p) => { p.name = e.target.value; }, { history: false })} />
-        <span className="text-xs text-slate-500">· {opt.name}</span>
-        <div className="ml-auto flex items-center gap-2 text-xs">
-          <span className={`rounded px-2 py-0.5 ${d.compliance.errors ? "bg-rose-600/30 text-rose-200" : "bg-emerald-600/30 text-emerald-200"}`}>{d.compliance.errors ? `${d.compliance.errors} code errors` : "Compliant"}</span>
-          <span className="font-mono text-slate-300">GFA {Math.round(d.kpis.gfa_m2).toLocaleString()} m² · FAR {d.kpis.far.toFixed(2)} · {d.kpis.unit_count} units</span>
-          <button className="rounded bg-slate-800 px-2 py-1 hover:bg-slate-700" onClick={undo} title="Ctrl+Z">Undo</button>
-          <button className="rounded bg-slate-800 px-2 py-1 hover:bg-slate-700" onClick={redo} title="Ctrl+Shift+Z">Redo</button>
+    <div className="dots flex h-screen flex-col text-ink">
+      <header className="flex h-14 items-center gap-3 px-4">
+        <Link href="/" className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-panel text-ink-2 hover:text-ink"><ArrowLeft size={16} /></Link>
+        <div className="glass-soft pill flex items-center gap-2 px-3 py-1.5">
+          <span className="h-2 w-2 rounded-full bg-accent" />
+          <input className="bg-transparent text-[13px] font-semibold tracking-tight focus:outline-none" value={project.name} onChange={(e) => mutate((p) => { p.name = e.target.value; }, { history: false })} />
+          <span className="text-[11px] text-ink-3">/ {opt.name}</span>
+        </div>
+        <Segmented value={panel} options={panels} onChange={setPanel} className="ml-2" />
+        <div className="ml-auto flex items-center gap-2">
+          <Chip tone={d.compliance.errors ? "danger" : "teal"}>{d.compliance.errors ? `${d.compliance.errors} code errors` : "Compliant"}</Chip>
+          <span className="mono text-[11.5px] text-ink-2">GFA {Math.round(d.kpis.gfa_m2).toLocaleString()} m² · FAR {d.kpis.far.toFixed(2)} · {d.kpis.unit_count} units</span>
+          <IconBtn onClick={undo} title="Undo (Ctrl+Z)"><Undo2 size={15} /></IconBtn>
+          <IconBtn onClick={redo} title="Redo (Ctrl+Shift+Z)"><Redo2 size={15} /></IconBtn>
+          <IconBtn onClick={snapshot} title="Snapshot PNG"><Camera size={15} /></IconBtn>
           <div className="relative">
-            <button className="rounded bg-sky-600 px-3 py-1 font-medium hover:bg-sky-500" onClick={() => setExp(!exp)}>Export ▾</button>
+            <Btn variant="primary" onClick={() => setExp(!exp)}><Download size={14} /> Export <ChevronDown size={12} /></Btn>
             {exp && (
-              <div className="absolute right-0 z-20 mt-1 w-56 rounded border border-slate-700 bg-slate-900 p-1 shadow-xl" onMouseLeave={() => setExp(false)}>
+              <div className="glass absolute right-0 z-20 mt-2 w-64 rounded-[14px] p-1.5" onMouseLeave={() => setExp(false)}>
                 {[
-                  { l: "OBJ (3D mesh)", f: () => download(`${safe}-${opt.name}.obj`, exportObj(opt, project.site, true)) },
-                  { l: "DXF (3D faces + plans)", f: () => download(`${safe}-${opt.name}.dxf`, exportDxf(opt, project.site, true), "application/dxf") },
-                  { l: "Excel (KPIs, schedules, checks)", f: () => download(`${safe}.xlsx`, exportExcel(project)) },
+                  { l: "OBJ · 3D mesh", f: () => download(`${safe}-${opt.name}.obj`, exportObj(opt, project.site, true)) },
+                  { l: "DXF · 3D faces + plans", f: () => download(`${safe}-${opt.name}.dxf`, exportDxf(opt, project.site, true), "application/dxf") },
+                  { l: "Excel · KPIs, schedules, checks", f: () => download(`${safe}.xlsx`, exportExcel(project)) },
                   { l: "Project JSON", f: () => download(`${safe}.saturn.json`, JSON.stringify(project, null, 2), "application/json") },
-                ].map((x) => <button key={x.l} className="block w-full rounded px-2 py-1 text-left text-sm hover:bg-slate-800" onClick={() => { x.f(); setExp(false); }}>{x.l}</button>)}
-                <div className="px-2 pt-1 text-[10px] text-slate-500">IFC, Rhino 3DM, dotBIM and PDF drawings arrive in Phase 3.</div>
+                ].map((x) => <button key={x.l} className="block w-full rounded-[10px] px-2.5 py-1.5 text-left text-[12.5px] hover:bg-white/10" onClick={() => { x.f(); setExp(false); }}>{x.l}</button>)}
+                <div className="px-2.5 pt-1 text-[10px] text-ink-3">IFC, Rhino 3DM, dotBIM and PDF drawings arrive in Phase 3.</div>
               </div>
             )}
           </div>
         </div>
       </header>
-      <div className="flex min-h-0 flex-1">
-        <aside className="flex w-12 flex-col items-center gap-1 border-r border-slate-800 py-2">
-          {tools.map((t) => <button key={t.id} title={`${t.label} (${t.key})`} className={`flex h-9 w-9 items-center justify-center rounded text-xs font-bold ${tool === t.id ? "bg-sky-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`} onClick={() => setTool(t.id)}>{t.key}</button>)}
-          <div className="mt-auto px-1 text-center text-[9px] leading-tight text-slate-600">Dbl-click or Enter to finish · Esc cancels · +/- storeys</div>
-        </aside>
-        <main className="flex min-w-0 flex-1 flex-col">
-          <div className="relative min-h-0 flex-1"><Scene3D />
-            {tool !== "select" && <div className="pointer-events-none absolute left-3 top-3 rounded bg-slate-900/80 px-3 py-1 text-xs text-slate-200">{tools.find((t) => t.id === tool)?.label}: click to place points{tool === "draw-rect" ? " (two corners)" : ", double-click or Enter to finish"}.</div>}
+      <div className="flex min-h-0 flex-1 gap-3 px-3 pb-3">
+        <main className="relative min-w-0 flex-1 overflow-hidden rounded-[22px] border border-line bg-bg-2">
+          <Scene3D />
+          <div className="glass pill absolute bottom-3 left-1/2 flex -translate-x-1/2 items-center gap-1 p-1.5">
+            {tools.map((t) => <IconBtn key={t.id} active={tool === t.id} title={`${t.label} (${t.key})`} onClick={() => setTool(t.id)}>{t.icon}</IconBtn>)}
+            <span className="mx-1 h-6 w-px bg-line-2" />
+            <span className="px-2 text-[10.5px] text-ink-3">Dbl-click / Enter finish · Esc cancel · +/− storeys</span>
           </div>
+          {tool !== "select" && <div className="glass-soft pill pointer-events-none absolute left-3 top-3 px-3 py-1 text-[11.5px] text-ink">{tools.find((t) => t.id === tool)?.label}: click to place points{tool === "draw-rect" ? " (two corners)" : ", double-click or Enter to finish"}.</div>}
           <AnalysisBar />
         </main>
-        <aside className="flex w-80 flex-col border-l border-slate-800">
-          <nav className="flex border-b border-slate-800 text-xs">
-            {panels.map((p) => <button key={p.id} className={`flex-1 px-1 py-2 ${panel === p.id ? "border-b-2 border-sky-500 text-white" : "text-slate-400 hover:text-white"}`} onClick={() => setPanel(p.id)}>{p.label}{p.badge && <span className="ml-1 rounded bg-rose-600 px-1 text-[10px]">{p.badge}</span>}</button>)}
-          </nav>
-          <div className="min-h-0 flex-1 overflow-y-auto p-3">
+        <aside className="glass flex w-[340px] flex-col rounded-[22px]">
+          <div className="flex items-center justify-between border-b border-line px-4 py-3"><div className="label">{panels.find((p) => p.id === panel)?.label}</div><span className="text-[10.5px] text-ink-3">{project.settings.rule_pack_id}</span></div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4">
             {panel === "kpi" && <KpiPanel />}
             {panel === "compliance" && <CompliancePanel />}
             {panel === "zoning" && <ZoningPanel />}

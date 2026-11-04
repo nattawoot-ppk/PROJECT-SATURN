@@ -4,13 +4,15 @@ import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { nanoid } from "nanoid";
+import { ArrowLeft, MapPin } from "lucide-react";
 import type { Project } from "@saturn/model";
 import { lonLatToLocal, ensureCCW } from "@saturn/geometry";
 import { saveProject } from "@/lib/storage";
 import { fetchOsmContext } from "@/lib/providers/context";
 import type { SitePick } from "@/components/map/SiteMap";
+import { Btn, Field, Input, Panel, Chip } from "@/components/ui";
 
-const SiteMap = dynamic(() => import("@/components/map/SiteMap"), { ssr: false, loading: () => <div className="h-[420px] rounded border border-slate-800" /> });
+const SiteMap = dynamic(() => import("@/components/map/SiteMap"), { ssr: false, loading: () => <div className="h-[460px] rounded-[16px] border border-line" /> });
 
 export default function NewProject() {
   const router = useRouter();
@@ -25,7 +27,7 @@ export default function NewProject() {
     const parcel = pick.parcelLonLat ? ensureCCW(pick.parcelLonLat.map(([lon, lat]) => lonLatToLocal(origin, lon, lat))) : undefined;
     const project: Project = {
       id, schema_version: 1, name, jurisdiction: "generic", tags: [],
-      site: { origin, context_radius_m: radius, parcel, parcel_source: "drawn", context_buildings: [], streets: [], zoning: { source: "manual", setbacks: [], default_setback_m: 0, custom: {} } },
+      site: { origin, context_radius_m: radius, parcel, parcel_source: "drawn", context_buildings: [], streets: [], street_sections: [], underlays: [], zoning: { source: "manual", setbacks: [], default_setback_m: 0, custom: {} } },
       options: [{ id: "opt1", name: "Option A", buildings: [], created_at: now, updated_at: now }], active_option_id: "opt1",
       settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "generic-international" },
       created_at: now, updated_at: now,
@@ -39,19 +41,28 @@ export default function NewProject() {
   };
 
   return (
-    <main className="mx-auto max-w-4xl p-8">
-      <Link href="/" className="text-sm text-slate-400 hover:text-white">← Projects</Link>
-      <h1 className="mb-4 mt-2 text-xl font-semibold">New project</h1>
-      <div className="space-y-4">
-        <label className="block space-y-1"><span className="text-xs uppercase tracking-wide text-slate-400">Project name</span><input className="w-full rounded bg-slate-800 px-2 py-1" value={name} onChange={(e) => setName(e.target.value)} /></label>
-        <SiteMap value={pick} onChange={setPick} />
-        <div className="flex flex-wrap items-center gap-4 text-sm">
-          <label className="flex items-center gap-2">Context radius <input type="number" className="w-20 rounded bg-slate-800 px-2 py-1" value={radius} step={50} onChange={(e) => setRadius(Number(e.target.value))} /> m</label>
-          <label className="flex items-center gap-2"><input type="checkbox" checked={fetchCtx} onChange={(e) => setFetchCtx(e.target.checked)} /> Fetch OSM buildings & streets</label>
-          <span className="text-slate-500">{pick.parcelLonLat ? `Parcel: ${pick.parcelLonLat.length} corners` : "No parcel yet (you can draw it later in 3D)"}</span>
+    <main className="dots-warm min-h-screen">
+      <div className="mx-auto max-w-5xl px-6 py-8">
+        <Link href="/" className="inline-flex items-center gap-1 text-[12px] text-ink-2 hover:text-ink"><ArrowLeft size={14} /> Projects</Link>
+        <div className="mb-6 mt-3 flex items-end justify-between">
+          <div><h1 className="text-[28px] font-semibold tracking-tight">New project</h1><p className="text-[13px] text-ink-2">Pick the site on the map, outline the parcel, and we fetch the surroundings.</p></div>
+          <Chip tone="accent"><MapPin size={12} /> {pick.lat.toFixed(4)}, {pick.lon.toFixed(4)}</Chip>
         </div>
-        <button disabled={!!busy} className="rounded bg-sky-600 px-4 py-2 font-medium hover:bg-sky-500 disabled:opacity-50" onClick={create}>{busy ? "Creating…" : "Create project"}</button>
-        {busy && <div className="text-xs text-slate-400">{busy}</div>}
+        <div className="grid gap-4 lg:grid-cols-[1fr_300px]">
+          <Panel><SiteMap value={pick} onChange={setPick} /></Panel>
+          <div className="space-y-4">
+            <Panel title="Project">
+              <Field label="Name"><Input value={name} onChange={(e) => setName(e.target.value)} /></Field>
+              <Field label="Context radius (m)" className="mt-3"><Input type="number" value={radius} step={50} onChange={(e) => setRadius(Number(e.target.value))} /></Field>
+              <label className="mt-3 flex items-center gap-2 text-[13px]"><input type="checkbox" checked={fetchCtx} onChange={(e) => setFetchCtx(e.target.checked)} /> Fetch OSM buildings & streets</label>
+            </Panel>
+            <Panel title="Status">
+              <div className="text-[13px] text-ink-2">{pick.parcelLonLat ? `Parcel outlined with ${pick.parcelLonLat.length} corners.` : "No parcel yet. You can also draw it later in the 3D view."}</div>
+              {busy && <div className="mt-2 text-[12px] text-amber">{busy}</div>}
+            </Panel>
+            <Btn variant="primary" className="w-full py-2.5" disabled={!!busy} onClick={create}>{busy ? "Creating…" : "Create project"}</Btn>
+          </div>
+        </div>
       </div>
     </main>
   );

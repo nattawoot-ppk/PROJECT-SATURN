@@ -1,12 +1,12 @@
 "use client";
 import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
-import { OrbitControls, Line } from "@react-three/drei";
+import { OrbitControls, Line, Html } from "@react-three/drei";
 import { useMemo, useRef, useEffect, useState } from "react";
 import { useEditor, activeOption } from "@/lib/store";
 import { extrudeRing } from "@/lib/extrude";
-import { computeEnvelope, buildingHeight, type Building } from "@saturn/model";
-import { centroid, bounds, distPointRing, type Ring } from "@saturn/geometry";
-import { SunLight, SunOverlay, DaylightOverlay } from "./SunOverlay";
+import { computeEnvelope, buildingHeight, evaluateRules, getRulePack, type Building } from "@saturn/model";
+import { centroid, bounds, distPointRing, ringArea, type Ring } from "@saturn/geometry";
+import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay } from "./SunOverlay";
 
 function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [number, number] {
   const cands: [number, number][] = [...(parcel ?? []), ...env.flat()];
@@ -14,7 +14,7 @@ function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [num
   return [Math.round(pt[0] * 2) / 2, Math.round(pt[1] * 2) / 2];
 }
 
-function BuildingMesh({ b, selected }: { b: Building; selected: boolean }) {
+function BuildingMesh({ b, selected, violation }: { b: Building; selected: boolean; violation: boolean }) {
   const select = useEditor((s) => s.select);
   const tool = useEditor((s) => s.tool);
   const geoms = useMemo(() => {
@@ -22,7 +22,9 @@ function BuildingMesh({ b, selected }: { b: Building; selected: boolean }) {
     return b.storeys.map((s) => { const g = extrudeRing(s.footprint ?? b.footprint, z, z + s.height_m); z += s.height_m; return { g, z0: z - s.height_m, z1: z, fp: s.footprint ?? b.footprint }; });
   }, [b]);
   useEffect(() => () => geoms.forEach((x) => x.g.dispose()), [geoms]);
-  const color = b.color ?? "#4f8cff";
+  const color = violation ? "#ff3b3b" : b.color ?? "#d9dde3";
+  const gfa = b.storeys.reduce((a, s) => a + ringArea(s.footprint ?? b.footprint), 0);
+  const top = centroid(b.footprint); const h = buildingHeight(b);
   const dragRef = useRef<{ start: [number, number]; snapshot: string; fp: Ring; storeyFps: (Ring | undefined)[] } | null>(null);
 
   const onDown = (e: ThreeEvent<PointerEvent>) => {
@@ -48,11 +50,16 @@ function BuildingMesh({ b, selected }: { b: Building; selected: boolean }) {
       {geoms.map((x, i) => (
         <group key={i}>
           <mesh geometry={x.g} castShadow receiveShadow>
-            <meshStandardMaterial color={color} emissive={selected ? color : "#000"} emissiveIntensity={selected ? 0.35 : 0} roughness={0.8} />
+            <meshStandardMaterial color={color} emissive={selected ? "#ff5a1f" : violation ? "#ff3b3b" : "#000"} emissiveIntensity={selected ? 0.45 : violation ? 0.35 : 0} roughness={0.9} metalness={0.05} />
           </mesh>
-          <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#fff" : "#1b2a3a"} lineWidth={selected ? 1.5 : 0.8} />
+          <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#ff5a1f" : violation ? "#ff7a7a" : "#2a2f36"} lineWidth={selected ? 1.5 : 0.7} />
         </group>
       ))}
+      <Html position={[top[0], top[1], h + 2.5]} center distanceFactor={220} zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
+        <div className={`whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-lg backdrop-blur-md ${violation ? "border-red-400/60 bg-red-500/20 text-red-100" : selected ? "border-orange-400/70 bg-orange-500/20 text-orange-50" : "border-white/15 bg-black/55 text-white/85"}`}>
+          <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${violation ? "bg-red-400" : "bg-orange-400"}`} />{b.name} · {b.storeys.length} st · {Math.round(gfa).toLocaleString()} m²
+        </div>
+      </Html>
     </group>
   );
 }
@@ -71,7 +78,7 @@ function StoreyHandle({ b }: { b: Building }) {
   return (
     <mesh position={[c[0], c[1], h + 1.2]} onPointerDown={(e) => { e.stopPropagation(); setDrag({ y: e.nativeEvent.clientY, n: b.storeys.length }); }}>
       <coneGeometry args={[1.2, 2.4, 16]} />
-      <meshStandardMaterial color="#ffd166" emissive="#ffd166" emissiveIntensity={0.4} />
+      <meshStandardMaterial color="#ff5a1f" emissive="#ff5a1f" emissiveIntensity={0.5} />
     </mesh>
   );
 }
@@ -106,7 +113,7 @@ function Ground() {
   return (
     <mesh position={[0, 0, -0.02]} onPointerMove={onMove} onClick={onClick} receiveShadow>
       <planeGeometry args={[4000, 4000]} />
-      <meshStandardMaterial color="#1a2230" />
+      <meshStandardMaterial color="#111419" roughness={1} />
     </mesh>
   );
 }
@@ -119,7 +126,7 @@ function rectFrom(a: [number, number], b: [number, number]): Ring {
 function DraftPreview() {
   const draft = useEditor((s) => s.draft); const hover = useEditor((s) => s.hover); const tool = useEditor((s) => s.tool);
   if (tool === "select") return null;
-  const color = tool === "draw-parcel" ? "#ffd166" : "#7cf";
+  const color = tool === "draw-parcel" ? "#ffffff" : "#ff5a1f";
   let pts: [number, number][] = draft;
   if (tool === "draw-rect" && draft.length === 1 && hover) pts = [...rectFrom(draft[0]!, hover), rectFrom(draft[0]!, hover)[0]!];
   else if (hover) pts = [...draft, hover];
@@ -137,13 +144,13 @@ function ContextMeshes() {
   const geoms = useMemo(() => (project?.site.context_buildings ?? []).map((c) => extrudeRing(c.footprint, 0, c.height_m)), [project?.site.context_buildings]);
   useEffect(() => () => geoms.forEach((g) => g.dispose()), [geoms]);
   if (!show) return null;
-  return <group>{geoms.map((g, i) => <mesh key={i} geometry={g} castShadow receiveShadow><meshStandardMaterial color="#8a93a3" roughness={1} /></mesh>)}</group>;
+  return <group>{geoms.map((g, i) => <mesh key={i} geometry={g} castShadow receiveShadow><meshStandardMaterial color="#3a4047" roughness={1} /></mesh>)}</group>;
 }
 
 function Streets() {
   const streets = useEditor((s) => s.project?.site.streets ?? []); const show = useEditor((s) => s.showContext);
   if (!show) return null;
-  return <group>{streets.map((s) => <Line key={s.id} points={s.centreline.map(([x, y]) => [x, y, 0.03] as [number, number, number])} color="#5a6b85" lineWidth={Math.max(0.5, s.width_m / 8)} />)}</group>;
+  return <group>{streets.map((s) => <Line key={s.id} points={s.centreline.map(([x, y]) => [x, y, 0.03] as [number, number, number])} color="#3b4350" lineWidth={Math.max(0.5, s.width_m / 8)} />)}</group>;
 }
 
 function SiteOverlay() {
@@ -153,11 +160,11 @@ function SiteOverlay() {
   const parcel = project?.site.parcel;
   return (
     <group>
-      {parcel && <Line points={[...parcel, parcel[0]!].map(([x, y]) => [x, y, 0.04] as [number, number, number])} color="#ffd166" lineWidth={2} />}
+      {parcel && <Line points={[...parcel, parcel[0]!].map(([x, y]) => [x, y, 0.04] as [number, number, number])} color="#ffffff" lineWidth={1.4} />}
       {showEnv && env.map((p, i) => (
         <group key={i}>
-          <mesh geometry={envGeoms[i]} position={[0, 0, 0.02]}><meshBasicMaterial color="#3ddc97" transparent opacity={0.12} depthWrite={false} /></mesh>
-          <Line points={[...p.outer, p.outer[0]!].map(([x, y]) => [x, y, 0.05] as [number, number, number])} color="#3ddc97" lineWidth={1} dashed dashSize={2} gapSize={1} />
+          <mesh geometry={envGeoms[i]} position={[0, 0, 0.02]}><meshBasicMaterial color="#19e6c1" transparent opacity={0.08} depthWrite={false} /></mesh>
+          <Line points={[...p.outer, p.outer[0]!].map(([x, y]) => [x, y, 0.05] as [number, number, number])} color="#19e6c1" lineWidth={1} dashed dashSize={2} gapSize={1} />
         </group>
       ))}
     </group>
@@ -178,20 +185,26 @@ export default function Scene3D() {
   const project = useEditor((s) => s.project); const selectedId = useEditor((s) => s.selectedId);
   const opt = activeOption(project);
   const selected = opt?.buildings.find((b) => b.id === selectedId);
+  const violating = useMemo(() => {
+    if (!project || !opt) return new Set<string>();
+    const r = evaluateRules(getRulePack(project.settings.rule_pack_id), opt, project.site, project.settings);
+    return new Set(r.findings.filter((f) => f.severity === "error" && f.building_id).map((f) => f.building_id!));
+  }, [project, opt]);
   return (
-    <Canvas shadows camera={{ fov: 45, near: 0.5, far: 5000, up: [0, 0, 1], position: [120, -160, 110] }} gl={{ antialias: true }} dpr={[1, 2]} style={{ background: "#0e141c" }}>
+    <Canvas shadows camera={{ fov: 45, near: 0.5, far: 5000, up: [0, 0, 1], position: [120, -160, 110] }} gl={{ antialias: true }} dpr={[1, 2]} style={{ background: "#0d1014" }}>
       <ambientLight intensity={0.55} />
       <SunLight />
-      <hemisphereLight args={["#b8d0ff", "#1a2230", 0.4]} />
+      <hemisphereLight args={["#cfd8e6", "#0d1014", 0.5]} />
       <Ground />
-      <gridHelper args={[2000, 400, "#2f4260", "#1c2838"]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.01]} />
+      <gridHelper args={[2000, 400, "#2a3038", "#1a1e25"]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.01]} />
       <SiteOverlay />
       <ContextMeshes />
       <Streets />
-      {opt?.buildings.map((b) => <BuildingMesh key={b.id} b={b} selected={b.id === selectedId} />)}
+      {opt?.buildings.map((b) => <BuildingMesh key={b.id} b={b} selected={b.id === selectedId} violation={violating.has(b.id)} />)}
       {selected && <StoreyHandle b={selected} />}
       <SunOverlay />
       <DaylightOverlay />
+      <ViewsOverlay />
       <DraftPreview />
       <CameraRig />
     </Canvas>

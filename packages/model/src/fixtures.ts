@@ -20,6 +20,8 @@ export function sampleProject(): Project {
       parcel_source: "drawn",
       context_buildings: [{ id: "c1", footprint: rectRing(70, 0, 20, 40), height_m: 18, height_source: "estimated" }],
       streets: [],
+      street_sections: [],
+      underlays: [],
       zoning: { source: "manual", max_height_m: 24, max_storeys: 7, far_max: 2.5, coverage_pct_max: 40, setbacks: [], default_setback_m: 6, parking_per_unit: 1, custom: {} },
     },
     options: [{

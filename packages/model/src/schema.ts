@@ -56,12 +56,37 @@ export const StreetSchema = z.object({
   class: z.enum(["motorway", "primary", "secondary", "tertiary", "residential", "service", "path", "other"]).default("other"),
   name: z.string().optional(),
   width_m: z.number().positive().default(8),
+  section_id: z.string().optional(),
   traffic: z.object({
     speed_kmh: z.number().positive().default(50),
     aadt: z.number().nonnegative().default(2000),
     heavy_pct: z.number().min(0).max(100).default(5),
   }).default({}),
 });
+
+export const StreetBandType = z.enum(["pavement", "roadway", "bike_lane", "planting", "parking", "median", "safety_zone", "plot_setback"]);
+export type StreetBandType = z.infer<typeof StreetBandType>;
+export const StreetSectionSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  /** Ordered left → right across the street */
+  bands: z.array(z.object({ type: StreetBandType, width_m: z.number().positive() })).min(1),
+});
+export type StreetSection = z.infer<typeof StreetSectionSchema>;
+
+export const UnderlaySchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  /** data URL or blob URL of the image */
+  src: z.string(),
+  /** placement: centre in local metres, width in metres, rotation in degrees */
+  centre: Vec2Schema,
+  width_m: z.number().positive(),
+  rotation_deg: z.number().default(0),
+  opacity: z.number().min(0).max(1).default(0.6),
+  aspect: z.number().positive().default(1),
+});
+export type Underlay = z.infer<typeof UnderlaySchema>;
 
 export const SiteSchema = z.object({
   origin: z.object({ lat: z.number(), lon: z.number() }),
@@ -79,6 +104,8 @@ export const SiteSchema = z.object({
   }).optional(),
   context_buildings: z.array(ContextBuildingSchema).default([]),
   streets: z.array(StreetSchema).default([]),
+  street_sections: z.array(StreetSectionSchema).default([]),
+  underlays: z.array(UnderlaySchema).default([]),
   zoning: ZoningParamsSchema.default({}),
 });
 export type Site = z.infer<typeof SiteSchema>;

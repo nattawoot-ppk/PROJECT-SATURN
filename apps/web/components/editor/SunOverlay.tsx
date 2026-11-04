@@ -46,6 +46,14 @@ export function DaylightOverlay() {
   return <group>{meshes.map((m, i) => m && <primitive key={i} object={m} />)}</group>;
 }
 
+export function ViewsOverlay() {
+  const v = useAnalysis((s) => s.views); const overlay = useAnalysis((s) => s.overlay);
+  const mesh = useMemo(() => (v ? facadeMesh(v.facade.samples, v.facade.openness, 100) : null), [v]);
+  useEffect(() => () => { mesh?.geometry.dispose(); (mesh?.material as THREE.Material | undefined)?.dispose(); }, [mesh]);
+  if (!v || overlay !== "views" || !mesh) return null;
+  return <primitive object={mesh} />;
+}
+
 /** Heatmap plane for ground sun-hours plus instanced quads on façades. */
 export function SunOverlay() {
   const sun = useAnalysis((s) => s.sun); const overlay = useAnalysis((s) => s.overlay);

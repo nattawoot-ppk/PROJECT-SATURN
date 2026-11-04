@@ -4,7 +4,7 @@ import { intersect, offsetPolygon, difference, polygonArea, bounds, rotateRing, 
 
 export interface GenerateParams { target_gfa_m2: number; depth_m: number; gap_m: number; typologies: Array<"bars" | "perimeter" | "l-block">; max_options: number }
 
-const palette = ["#4f8cff", "#ff9f43", "#2ed573", "#a55eea", "#ff6b81", "#1dd1a1", "#feca57"];
+const palette = ["#e3e6ea", "#c9ced6", "#f0e6dc", "#d7dde6", "#e8ddd0", "#cfd6de", "#ece9e4"];
 
 function mkBuilding(name: string, fp: Ring, storeys: number, sh: number, color: string): Building {
   const id = nanoid(8);

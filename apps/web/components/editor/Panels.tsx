@@ -7,6 +7,8 @@ import { ringArea } from "@saturn/geometry";
 import { generateOptions } from "@/lib/generate";
 import { fetchOsmContext } from "@/lib/providers/context";
 import { Btn, Chip, Divider, Field, Input, Num, Select, StatTile } from "@/components/ui";
+import { StreetSectionsPanel, UnderlaysPanel } from "./SiteFeaturePanels";
+import { UnitsPanel } from "./UnitsPanel";
 
 export function useDerived() {
   const project = useEditor((s) => s.project);
@@ -113,8 +115,20 @@ export function ZoningPanel() {
 export function BuildingPanel() {
   const project = useEditor((s) => s.project); const id = useEditor((s) => s.selectedId);
   const update = useEditor((s) => s.updateBuilding); const setStoreys = useEditor((s) => s.setStoreys); const del = useEditor((s) => s.deleteBuilding);
-  const b = activeOption(project)?.buildings.find((x) => x.id === id);
-  if (!b) return <div className="text-[12.5px] text-ink-2">Select a building, or draw one with the polygon / rectangle tools in the bottom toolbar.</div>;
+  const select = useEditor((s) => s.select);
+  const all = activeOption(project)?.buildings ?? [];
+  const b = all.find((x) => x.id === id);
+  if (!b) return (
+    <div className="space-y-2 text-[12.5px]">
+      <div className="text-ink-2">Select a building in the view or from the list, or draw one with the polygon / rectangle tools.</div>
+      {all.map((x) => (
+        <button key={x.id} className="flex w-full items-center justify-between rounded-[12px] border border-line bg-panel px-3 py-2 text-left hover:bg-panel-2" onClick={() => select(x.id)}>
+          <span className="font-medium">{x.name}</span>
+          <span className="mono text-[11px] text-ink-3">{x.storeys.length} st · {Math.round(x.storeys.reduce((a, s) => a + ringArea(s.footprint ?? x.footprint), 0)).toLocaleString()} m²</span>
+        </button>
+      ))}
+    </div>
+  );
   const gfa = b.storeys.reduce((a, s) => a + ringArea(s.footprint ?? b.footprint), 0);
   return (
     <div className="space-y-3">
@@ -135,6 +149,7 @@ export function BuildingPanel() {
       <Field label="Colour"><input type="color" className="h-8 w-16 cursor-pointer rounded bg-transparent" value={b.color ?? "#d9dde3"} onChange={(e) => update(b.id, (bb) => { bb.color = e.target.value; })} /></Field>
       <div className="text-[10.5px] text-ink-3">Drag the orange cone above the building to change storeys. Drag the building to move it. +/− keys change storeys.</div>
       <Btn variant="danger" size="sm" onClick={() => del(b.id)}><Trash2 size={12} /> Delete building</Btn>
+      <UnitsPanel b={b} />
     </div>
   );
 }
@@ -220,6 +235,10 @@ export function SitePanel() {
       </div>
       <label className="flex items-center gap-2"><input type="checkbox" checked={showEnvelope} onChange={() => toggle("showEnvelope")} /> Show buildable envelope</label>
       <label className="flex items-center gap-2"><input type="checkbox" checked={showContext} onChange={() => toggle("showContext")} /> <Layers size={12} /> Show context</label>
+      <Divider />
+      <StreetSectionsPanel />
+      <Divider />
+      <UnderlaysPanel />
       <div className="text-[10.5px] text-ink-3">Terrain is flat in this build; elevation tiles arrive in a later phase.</div>
     </div>
   );

@@ -17,8 +17,9 @@ export default function AnalysisBar() {
   const project = useEditor((s) => s.project);
   const a = useAnalysis();
   const year = new Date().getFullYear();
-  const updatedAt = project?.updated_at;
+  const updatedAt = project?.updated_at; const optionId = project?.active_option_id;
   useEffect(() => { const st = useAnalysis.getState(); if (st.sun || st.daylight || st.views) st.set({ stale: true }); }, [updatedAt]);
+  useEffect(() => { useAnalysis.getState().set({ sun: null, daylight: null, views: null, overlay: "none", stale: false }); }, [optionId]);
   const run = (kind: "sun" | "daylight" | "views") => {
     if (!project) return; a.set({ running: kind });
     setTimeout(() => {

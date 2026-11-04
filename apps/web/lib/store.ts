@@ -18,6 +18,7 @@ interface EditorState {
   future: string[];
   showEnvelope: boolean;
   showContext: boolean;
+  showUnits: boolean;
   panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site";
 
   load: (p: Project) => void;
@@ -42,7 +43,7 @@ interface EditorState {
   applyAutofix: (kind: "clamp_height" | "clamp_storeys" | "trim_to_envelope", buildingId?: string) => void;
   undo: () => void;
   redo: () => void;
-  toggle: (k: "showEnvelope" | "showContext") => void;
+  toggle: (k: "showEnvelope" | "showContext" | "showUnits") => void;
 }
 
 export const activeOption = (p: Project | null): DesignOption | null =>
@@ -52,7 +53,7 @@ const palette = ["#e3e6ea", "#c9ced6", "#f0e6dc", "#d7dde6", "#e8ddd0", "#cfd6de
 
 export const useEditor = create<EditorState>((set, get) => ({
   project: null, selectedId: null, tool: "select", draft: [], hover: null, past: [], future: [],
-  showEnvelope: true, showContext: true, panel: "kpi",
+  showEnvelope: true, showContext: true, showUnits: true, panel: "kpi",
 
   load: (p) => set({ project: p, past: [], future: [], selectedId: null, draft: [] }),
 

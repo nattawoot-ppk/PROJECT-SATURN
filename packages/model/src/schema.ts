@@ -116,6 +116,7 @@ export const UnitSchema = z.object({
   polygon: RingSchema,
   area_m2: z.number().nonnegative().optional(),
 });
+export type Unit = z.infer<typeof UnitSchema>;
 
 export const StoreySchema = z.object({
   id: z.string(),

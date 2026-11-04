@@ -7,6 +7,8 @@ import { extrudeRing } from "@/lib/extrude";
 import { computeEnvelope, buildingHeight, evaluateRules, getRulePack, type Building } from "@saturn/model";
 import { centroid, bounds, distPointRing, ringArea, type Ring } from "@saturn/geometry";
 import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay } from "./SunOverlay";
+import { StreetSections, Underlays } from "./SiteFeatures";
+import { UnitTiles, ParkingMeshes } from "./UnitsAndParking";
 
 function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [number, number] {
   const cands: [number, number][] = [...(parcel ?? []), ...env.flat()];
@@ -23,6 +25,8 @@ function BuildingMesh({ b, selected, violation }: { b: Building; selected: boole
   }, [b]);
   useEffect(() => () => geoms.forEach((x) => x.g.dispose()), [geoms]);
   const color = violation ? "#ff3b3b" : b.color ?? "#d9dde3";
+  const showUnits = useEditor((s) => s.showUnits);
+  const hasUnits = showUnits && b.storeys.some((s) => s.units.length > 0);
   const gfa = b.storeys.reduce((a, s) => a + ringArea(s.footprint ?? b.footprint), 0);
   const top = centroid(b.footprint); const h = buildingHeight(b);
   const dragRef = useRef<{ start: [number, number]; snapshot: string; fp: Ring; storeyFps: (Ring | undefined)[] } | null>(null);
@@ -50,7 +54,7 @@ function BuildingMesh({ b, selected, violation }: { b: Building; selected: boole
       {geoms.map((x, i) => (
         <group key={i}>
           <mesh geometry={x.g} castShadow receiveShadow>
-            <meshStandardMaterial color={color} emissive={selected ? "#ff5a1f" : violation ? "#ff3b3b" : "#000"} emissiveIntensity={selected ? 0.45 : violation ? 0.35 : 0} roughness={0.9} metalness={0.05} />
+            <meshStandardMaterial color={color} emissive={selected ? "#ff5a1f" : violation ? "#ff3b3b" : "#000"} emissiveIntensity={selected ? 0.45 : violation ? 0.35 : 0} roughness={0.9} metalness={0.05} transparent={hasUnits} opacity={hasUnits ? 0.28 : 1} depthWrite={!hasUnits} />
           </mesh>
           <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#ff5a1f" : violation ? "#ff7a7a" : "#2a2f36"} lineWidth={selected ? 1.5 : 0.7} />
         </group>
@@ -197,10 +201,14 @@ export default function Scene3D() {
       <hemisphereLight args={["#cfd8e6", "#0d1014", 0.5]} />
       <Ground />
       <gridHelper args={[2000, 400, "#2a3038", "#1a1e25"]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.01]} />
+      <Underlays />
       <SiteOverlay />
       <ContextMeshes />
       <Streets />
+      <StreetSections />
       {opt?.buildings.map((b) => <BuildingMesh key={b.id} b={b} selected={b.id === selectedId} violation={violating.has(b.id)} />)}
+      <UnitTiles />
+      <ParkingMeshes />
       {selected && <StoreyHandle b={selected} />}
       <SunOverlay />
       <DaylightOverlay />

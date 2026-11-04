@@ -72,3 +72,19 @@ describe("rules", () => {
     expect(r.envelope.length).toBe(1);
   });
 });
+
+describe("custom rules", () => {
+  it("evaluates project-level expressions alongside the pack", () => {
+    const p = sampleProject();
+    p.settings.custom_rules = [{ id: "r1", title: "Max 50 units", severity: "error", scope: "site", expr: "kpi.unit_count <= 50", message: "{kpi.unit_count} units; client brief allows 50", enabled: true },
+      { id: "r2", title: "Min 5 storeys", severity: "warning", scope: "building", expr: "building.storeys >= 5", message: "{building.name} has {building.storeys}", enabled: true },
+      { id: "r3", title: "Disabled", severity: "error", scope: "site", expr: "false", message: "", enabled: false }];
+    const r = evaluateRules(GENERIC_PACK, p.options[0]!, p.site, p.settings);
+    const ids = r.findings.map((f) => f.rule_id);
+    expect(ids).toContain("custom.r1"); expect(ids).not.toContain("custom.r2"); expect(ids).not.toContain("custom.r3");
+    expect(r.findings.find((f) => f.rule_id === "custom.r1")?.message).toBe("60 units; client brief allows 50");
+    p.settings.custom_rules[0]!.expr = "kpi.unit_count <= ("; // syntax error → info finding, never a crash
+    const r2 = evaluateRules(GENERIC_PACK, p.options[0]!, p.site, p.settings);
+    expect(r2.findings.find((f) => f.rule_id === "custom.r1")?.severity).toBe("info");
+  });
+});

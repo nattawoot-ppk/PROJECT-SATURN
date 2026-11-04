@@ -110,7 +110,7 @@ GFA, GIA/NIA (configurable efficiency), per-use GFA, storey count, height (max/a
 - **Rule** = `{ id, title, severity: error|warning|info, scope: site|building|storey|unit, expr, message, autofix? }` where `expr` is a sandboxed expression over KPIs and geometry predicates (e.g. `building.height_m <= zoning.max_height_m`, `distance(building, parcel.edge[i]) >= zoning.setback[i]`, `kpi.bya_pct <= zoning.bya_pct_max`, `unit.area >= pack.min_unit_area[unit.type]`).
 - Evaluation: client-side on each change, < 50 ms; results panel with jump-to-object; coloured overlays (red faces for height/setback breaches).
 - **Autofix**: clamp height to max, trim footprint to setback envelope, reduce storeys — applied only on explicit click.
-- **Custom rules**: user-editable in a form (parameter) or expression editor (advanced) saved to project; organisation-level shared packs.
+- **Custom rules**: user-editable in a form (parameter) or expression editor (advanced) saved to project (built: `settings.custom_rules`, Zoning panel editor); organisation-level shared packs (pending).
 - Starter packs: (1) generic international (height/setback/FAR/coverage/parking/min unit), (2) launch jurisdiction pack (to be decided, see PRD open questions), (3) Norway reference pack (BYA/BRA, TEK17 daylight/ceiling/fire-distance basics) for parity testing.
 
 ### M8 Fast in-browser analyses

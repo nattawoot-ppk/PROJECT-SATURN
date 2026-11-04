@@ -11,6 +11,7 @@ import { slopeStats } from "@saturn/geometry";
 import { Btn, Chip, Divider, Field, Input, Num, Select, StatTile } from "@/components/ui";
 import { StreetSectionsPanel, UnderlaysPanel } from "./SiteFeaturePanels";
 import { UnitsPanel } from "./UnitsPanel";
+import { CustomRulesPanel } from "./CustomRulesPanel";
 
 export function useDerived() {
   const project = useEditor((s) => s.project);
@@ -110,6 +111,14 @@ export function ZoningPanel() {
         {USE_CLASSES.map((u) => { const on = z.allowed_uses?.includes(u); return <button key={u} className={`pill px-2.5 py-0.5 text-[11px] ${on ? "bg-accent text-white" : "bg-panel-2 text-ink-2"}`} onClick={() => setZoning((zz) => { const set = new Set(zz.allowed_uses ?? []); if (set.has(u)) set.delete(u); else set.add(u); zz.allowed_uses = set.size ? [...set] : undefined; })}>{u}</button>; })}
       </div>
       <div className="text-[10.5px] text-ink-3">Source: {z.source}. Leave a field blank if it is not regulated.</div>
+      {project.settings.rule_pack_id === "th-bangkok" && (
+        <div className="grid grid-cols-2 gap-2">
+          <Num label="Road width (m)" value={z.custom.road_width_m} step={0.5} onChange={(v) => setZoning((zz) => { zz.custom = { ...zz.custom, road_width_m: v ?? 0 }; })} />
+          <Num label="Front setback (m)" value={z.custom.front_setback_m} step={0.5} onChange={(v) => setZoning((zz) => { zz.custom = { ...zz.custom, front_setback_m: v ?? 0 }; })} />
+        </div>
+      )}
+      <Divider />
+      <CustomRulesPanel />
     </div>
   );
 }

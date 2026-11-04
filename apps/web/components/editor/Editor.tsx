@@ -21,6 +21,8 @@ import AnalysisBar from "./AnalysisBar";
 import { Btn, Chip, IconBtn, Segmented } from "@/components/ui";
 import { makeShareUrl } from "@/lib/share";
 import { Share2 } from "lucide-react";
+import { useCloud } from "@/lib/cloud";
+import { api, cloudEnabled } from "@/lib/api";
 
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => <div className="flex h-full items-center justify-center text-ink-3">Loading 3D…</div> });
 
@@ -37,6 +39,9 @@ export default function Editor() {
   const { undo, redo, finishDraft, cancelDraft, deleteBuilding, mutate } = useEditor();
   const d = useDerived();
   const [exp, setExp] = useState(false);
+  const cloud = useCloud();
+  // Export gating mirrors the pricing table once the cloud is configured and the user is signed in: Free and Starter need Pro/Business or a day pass.
+  const gated = cloudEnabled() && !!cloud.me && cloud.entitlements !== null && !cloud.entitlements.exports;
 
   useEffect(() => {
     const h = (e: KeyboardEvent) => {
@@ -92,7 +97,7 @@ export default function Editor() {
                   { l: "glTF binary · for viewers and VR", f: () => exportGlb(project, opt, true).then((b) => download(`${safe}-${opt.name}.glb`, b)) },
                   { l: "Excel · KPIs, schedules, checks", f: () => download(`${safe}.xlsx`, exportExcel(project)) },
                   { l: "Project JSON", f: () => download(`${safe}.saturn.json`, JSON.stringify(project, null, 2), "application/json") },
-                ].map((x) => <button key={x.l} className="block w-full rounded-[10px] px-2.5 py-1.5 text-left text-[12.5px] hover:bg-white/10" onClick={() => { x.f(); setExp(false); }}>{x.l}</button>)}
+                ].map((x) => { const free = x.l.startsWith("Project JSON"); const locked = gated && !free; return <button key={x.l} className={`block w-full rounded-[10px] px-2.5 py-1.5 text-left text-[12.5px] hover:bg-white/10 ${locked ? "opacity-50" : ""}`} onClick={async () => { if (locked) { const org = cloud.me?.orgs[0]; if (org && confirm(`Exports need the Pro plan or a €30 day pass (plan: ${cloud.entitlements?.plan}). Buy a day pass now?`)) { try { const r = await api.daypass(org.id); window.location.href = r.url; } catch (e) { alert((e as Error).message); } } return; } x.f(); setExp(false); }}>{locked ? "🔒 " : ""}{x.l}</button>; })}
                 <div className="px-2.5 pt-1 text-[10px] text-ink-3">PDF drawings are in the Drawings panel.</div>
               </div>
             )}

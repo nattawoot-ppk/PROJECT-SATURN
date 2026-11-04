@@ -97,9 +97,10 @@ export function evaluateRules(pack: RulePack, option: DesignOption, site: Site, 
   const base = { kpi: k, zoning, settings, site: { has_parcel: !!site.parcel } };
   const envelope = computeEnvelope(site);
   const findings: Finding[] = [];
+  const custom: Rule[] = (settings.custom_rules ?? []).filter((r) => r.enabled).map((r) => ({ id: `custom.${r.id}`, title: r.title, severity: r.severity, scope: r.scope, expr: r.expr, message: r.message || `${r.title}: ${r.expr}` }));
 
-  for (const rule of pack.rules) {
-    const scope = rule.scope ?? (rule.builtin ? "building" : "site");
+  for (const rule of [...pack.rules, ...custom]) {
+    const scope = rule.scope ?? (rule.builtin && rule.builtin !== "parking_required" ? "building" : "site");
     const targets = scope === "building" ? option.buildings : [undefined];
     for (const b of targets) {
       const ctx: Record<string, unknown> = { ...base, building: b ? buildingCtx(b) : undefined };

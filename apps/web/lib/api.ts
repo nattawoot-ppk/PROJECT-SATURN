@@ -33,5 +33,7 @@ export const api = {
   resolveComment: (cid: string, resolved: boolean) => call<{ id: string }>(`/comments/${cid}`, { method: "PATCH", body: JSON.stringify({ resolved }) }),
   createOrg: (name: string) => call<{ id: string }>("/orgs", { method: "POST", body: JSON.stringify({ name }) }),
   plans: () => call<Array<{ id: string; name: string; monthly: number | null; yearly: number; features: string[] }>>("/billing/plans"),
+  entitlements: (orgId: string) => call<{ plan: string; exports: boolean; day_pass_until: string | null; simulations: "basic" | "all"; imports: boolean; projects: number | null }>(`/billing/entitlements/${orgId}`),
+  daypass: (orgId: string) => call<{ url: string }>("/billing/daypass", { method: "POST", body: JSON.stringify({ orgId }) }),
   checkout: (orgId: string, plan: string, interval: "month" | "year") => call<{ url: string }>("/billing/checkout", { method: "POST", body: JSON.stringify({ orgId, plan, interval }) }),
 };

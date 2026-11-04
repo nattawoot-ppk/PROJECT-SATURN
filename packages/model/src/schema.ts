@@ -164,6 +164,18 @@ export const DesignOptionSchema = z.object({
 });
 export type DesignOption = z.infer<typeof DesignOptionSchema>;
 
+export const CustomRuleSchema = z.object({
+  id: z.string(),
+  title: z.string().min(1),
+  severity: z.enum(["error", "warning", "info"]).default("warning"),
+  scope: z.enum(["site", "building"]).default("site"),
+  /** Expression over kpi.*, zoning.*, settings.*, building.* that must be true to pass */
+  expr: z.string().min(1),
+  message: z.string().default(""),
+  enabled: z.boolean().default(true),
+});
+export type CustomRule = z.infer<typeof CustomRuleSchema>;
+
 export const ProjectSettingsSchema = z.object({
   avg_unit_area_m2: z.number().positive().default(70),
   residents_per_unit: z.number().positive().default(2.2),
@@ -171,6 +183,7 @@ export const ProjectSettingsSchema = z.object({
   sale_price_per_m2: z.number().nonnegative().optional(),
   currency: z.string().default("EUR"),
   rule_pack_id: z.string().default("generic-international"),
+  custom_rules: z.array(CustomRuleSchema).default([]),
 });
 export type ProjectSettings = z.infer<typeof ProjectSettingsSchema>;
 

@@ -29,7 +29,7 @@ export default function NewProject() {
       id, schema_version: 1, name, jurisdiction: "generic", tags: [],
       site: { origin, context_radius_m: radius, parcel, parcel_source: "drawn", context_buildings: [], streets: [], street_sections: [], underlays: [], zoning: { source: "manual", setbacks: [], default_setback_m: 0, custom: {} } },
       options: [{ id: "opt1", name: "Option A", buildings: [], created_at: now, updated_at: now }], active_option_id: "opt1",
-      settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "generic-international" },
+      settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "generic-international", custom_rules: [] },
       created_at: now, updated_at: now,
     };
     if (fetchCtx) {

@@ -33,3 +33,11 @@ describe("Thailand pack", () => {
     expect(r2.findings.some((f) => f.rule_id === "th.eia")).toBe(true);
   });
 });
+
+describe("builtin scopes", () => {
+  it("parking provision is reported once per site, not per building", () => {
+    const p = sampleProject();
+    const r = evaluateRules(THAILAND_PACK, p.options[0]!, p.site, p.settings);
+    expect(r.findings.filter((f) => f.rule_id === "th.parking").length).toBe(1);
+  });
+});

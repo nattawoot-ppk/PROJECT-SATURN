@@ -31,12 +31,15 @@
 - Passwordless email sign-in (magic link; dev mode returns the link), JWT session cookie/bearer.
 - Organisations with roles, floating seat leases (business plan), plan limits (free: 3 personal projects).
 - Cloud projects with optimistic locking (409 conflict returns the newer document; the editor offers load-theirs or overwrite), share tokens, comments anchored to buildings/options.
-- Billing: plan catalogue, Stripe Checkout session creation and webhook handler (active once keys are configured; returns 501 otherwise).
+- Billing: plan catalogue, Stripe Checkout subscriptions and the €30 Starter export day pass (one-off payment), webhook handler, entitlements endpoint; the web app locks exports for Free/Starter users once the cloud is configured and offers the day pass (active once keys are configured; 501 otherwise).
 - SQLite for development, Postgres for production (change the Prisma datasource provider). 2 integration tests cover the whole flow.
+- Optional product analytics with PostHog (EU host, loads only with a key, respects a local opt-out).
 - Web: sign-in pages, Cloud panel (upload/save, conflict handling, comments), cloud project list on the dashboard. Enabled by `NEXT_PUBLIC_API_URL`.
 - **Real-time co-editing**: Yjs rooms served by the API over WebSocket (y-websocket protocol); per-building merge of concurrent edits, presence with coloured outlines and name tags on the model, autosave of the merged document every 5 s. Shared mapping lives in `packages/realtime` (tests cover round-trip, concurrent merge and deletion); an API integration test syncs two clients and checks persistence.
 - **Email delivery** for magic links: Resend or a generic webhook (first configured wins); dev mode returns the link.
 - **Single sign-on**: OpenID Connect authorization-code flow (Google Workspace, Microsoft Entra, Okta, Auth0, Keycloak) with JWKS-verified ID tokens, optional allowed domains and auto-join of an organisation.
+
+**Custom rules**: project-level rules written as expressions over KPIs, zoning and building figures (with example templates and live evaluation), merged with the active pack on every edit.
 
 **Rule packs**: generic international, Norway reference (pbl/TEK17: %-BYA, %-BRA, gesims/møne, 4 m boundary, room height, daylight, parking) and Thailand · Bangkok (Ministerial Regulation 55/33: FAR/OSR per zone, 2× road-width height rule, high-rise and extra-large building road access and setbacks, open space, window distances, parking, EIA threshold). Switch in the Zoning panel.
 
@@ -72,4 +75,4 @@ pnpm dev:api            # API on http://localhost:4000
 pnpm dev
 ```
 
-Tests: `pnpm test` (61 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.
+Tests: `pnpm test` (63 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.

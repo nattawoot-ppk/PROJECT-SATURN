@@ -38,6 +38,11 @@ describe("api", () => {
     const unauth = await app.inject({ method: "GET", url: `/projects/${id}` }); expect(unauth.statusCode).toBe(401);
     const plans = await app.inject({ method: "GET", url: "/billing/plans" }); expect(plans.json().length).toBe(4);
     const co = await app.inject({ method: "POST", url: "/billing/checkout", headers: auth, payload: { orgId, plan: "pro" } }); expect(co.statusCode).toBe(501);
+    const ent = await app.inject({ method: "GET", url: `/billing/entitlements/${orgId}`, headers: auth }); expect(ent.json().exports).toBe(false); expect(ent.json().plan).toBe("free");
+    await app.inject({ method: "POST", url: "/billing/webhook", payload: { type: "checkout.session.completed", data: { object: { metadata: { orgId, daypass: "1" } } } } });
+    const ent2 = await app.inject({ method: "GET", url: `/billing/entitlements/${orgId}`, headers: auth }); expect(ent2.json().exports).toBe(true);
+    await app.inject({ method: "POST", url: "/billing/webhook", payload: { type: "checkout.session.completed", data: { object: { metadata: { orgId, plan: "pro" } } } } });
+    expect((await app.inject({ method: "GET", url: `/billing/entitlements/${orgId}`, headers: auth })).json().plan).toBe("pro");
   });
 });
 

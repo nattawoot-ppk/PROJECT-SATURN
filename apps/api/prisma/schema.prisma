@@ -34,6 +34,7 @@ model Organisation {
   plan      String   @default("free")        // free | starter | pro | business
   seats     Int      @default(1)             // floating concurrent seats (business)
   stripeCustomerId String?
+  dayPassUntil DateTime?
   createdAt DateTime @default(now())
   members   Membership[]
   projects  Project[]

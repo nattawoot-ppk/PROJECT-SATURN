@@ -1,6 +1,6 @@
 # Deployment guide
 
-Saturn runs as three processes: Postgres, the API (REST + WebSocket rooms) and the Next.js web app. Everything below is in `infra/` and the two Dockerfiles.
+SATRN runs as three processes: Postgres, the API (REST + WebSocket rooms) and the Next.js web app. Everything below is in `infra/` and the two Dockerfiles.
 
 ## 1. One-command stack (Docker Compose)
 

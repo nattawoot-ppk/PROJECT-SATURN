@@ -15,7 +15,7 @@ export function CloudPanel() {
   const refresh = c.refresh;
   useEffect(() => { refresh(); }, [refresh]);
   useEffect(() => { if (c.cloudId && c.me) api.comments(c.cloudId).then(setComments).catch(() => setComments([])); }, [c.cloudId, c.me]);
-  if (!cloudEnabled()) return <div className="space-y-2 text-[12.5px] text-ink-2"><div className="flex items-center gap-1.5 font-semibold text-ink"><Cloud size={14} /> Cloud</div><p>Set <span className="mono">NEXT_PUBLIC_API_URL</span> to the Saturn API to enable accounts, cloud projects, comments and billing. Until then projects stay in this browser and you can share read-only links.</p></div>;
+  if (!cloudEnabled()) return <div className="space-y-2 text-[12.5px] text-ink-2"><div className="flex items-center gap-1.5 font-semibold text-ink"><Cloud size={14} /> Cloud</div><p>Set <span className="mono">NEXT_PUBLIC_API_URL</span> to the SATRN API to enable accounts, cloud projects, comments and billing. Until then projects stay in this browser and you can share read-only links.</p></div>;
   if (!c.me) return <div className="space-y-3 text-[12.5px]"><div className="flex items-center gap-1.5 font-semibold"><Cloud size={14} /> Cloud</div><p className="text-ink-2">Sign in to save this project to the cloud, invite your organisation and comment.</p><Link href="/auth"><Btn variant="primary" size="sm"><LogIn size={12} /> Sign in</Btn></Link></div>;
   const save = async () => {
     c.set({ syncing: true, error: null });

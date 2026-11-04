@@ -6,7 +6,7 @@ export interface Mail { to: string; subject: string; text: string; html: string 
 export type MailResult = { provider: "resend" | "webhook" | "dev"; ok: boolean; error?: string };
 
 export async function sendMail(m: Mail, log: (o: object, msg: string) => void): Promise<MailResult> {
-  const from = process.env.EMAIL_FROM ?? "Saturn <no-reply@saturn.local>";
+  const from = process.env.EMAIL_FROM ?? "SATRN <no-reply@saturn.local>";
   if (process.env.RESEND_API_KEY) {
     const res = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: `Bearer ${process.env.RESEND_API_KEY}`, "Content-Type": "application/json" }, body: JSON.stringify({ from, to: [m.to], subject: m.subject, text: m.text, html: m.html }) });
     if (!res.ok) { const err = await res.text(); log({ err }, "resend failed"); return { provider: "resend", ok: false, error: err.slice(0, 200) }; }
@@ -21,5 +21,5 @@ export async function sendMail(m: Mail, log: (o: object, msg: string) => void): 
 }
 
 export function magicLinkMail(to: string, link: string): Mail {
-  return { to, subject: "Your Saturn sign-in link", text: `Sign in to Saturn: ${link}\n\nThe link is valid for 15 minutes and can be used once.`, html: `<p>Sign in to <strong>Saturn</strong>:</p><p><a href="${link}" style="display:inline-block;padding:10px 16px;background:#ff5a1f;color:#fff;border-radius:999px;text-decoration:none">Open Saturn</a></p><p style="color:#6b7380;font-size:12px">Valid for 15 minutes, single use.</p>` };
+  return { to, subject: "Your SATRN sign-in link", text: `Sign in to SATRN: ${link}\n\nThe link is valid for 15 minutes and can be used once.`, html: `<p>Sign in to <strong>SATRN</strong>:</p><p><a href="${link}" style="display:inline-block;padding:10px 16px;background:#ff5a1f;color:#fff;border-radius:999px;text-decoration:none">Open SATRN</a></p><p style="color:#6b7380;font-size:12px">Valid for 15 minutes, single use.</p>` };
 }

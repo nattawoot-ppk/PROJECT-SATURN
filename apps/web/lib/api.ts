@@ -1,7 +1,7 @@
 "use client";
 import type { Project } from "@saturn/model";
 
-/** Thin client for the Saturn API. Disabled (returns null) when NEXT_PUBLIC_API_URL is not configured. */
+/** Thin client for the SATRN API. Disabled (returns null) when NEXT_PUBLIC_API_URL is not configured. */
 export const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "";
 export const cloudEnabled = () => API_URL.length > 0;
 const TOKEN_KEY = "saturn.session";

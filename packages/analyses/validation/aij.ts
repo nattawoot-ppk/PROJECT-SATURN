@@ -1,5 +1,5 @@
 /**
- * AIJ pedestrian-wind benchmark harness for the Saturn 2D lattice-Boltzmann solver.
+ * AIJ pedestrian-wind benchmark harness for the SATRN 2D lattice-Boltzmann solver.
  *
  * The Architectural Institute of Japan publishes wind-tunnel measurements for standard cases
  * (https://www.aij.or.jp/jpn/publish/cfdguide/index_e.htm). Case A is a single 2:1:1 high-rise block (H = 2b),

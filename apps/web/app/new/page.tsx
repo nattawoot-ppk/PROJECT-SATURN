@@ -26,10 +26,10 @@ export default function NewProject() {
     const origin = { lat: pick.lat, lon: pick.lon };
     const parcel = pick.parcelLonLat ? ensureCCW(pick.parcelLonLat.map(([lon, lat]) => lonLatToLocal(origin, lon, lat))) : undefined;
     const project: Project = {
-      id, schema_version: 1, name, jurisdiction: "generic", tags: [],
+      id, schema_version: 1, name, jurisdiction: "TH-BKK", tags: [],
       site: { origin, context_radius_m: radius, parcel, parcel_source: "drawn", context_buildings: [], streets: [], street_sections: [], underlays: [], zoning: { source: "manual", setbacks: [], default_setback_m: 0, custom: {} } },
       options: [{ id: "opt1", name: "Option A", buildings: [], created_at: now, updated_at: now }], active_option_id: "opt1",
-      settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "generic-international", custom_rules: [] },
+      settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "th-bangkok", custom_rules: [] },
       created_at: now, updated_at: now,
     };
     if (fetchCtx) {
@@ -37,7 +37,7 @@ export default function NewProject() {
       try { const r = await fetchOsmContext(origin, radius); project.site.context_buildings = r.buildings; project.site.streets = r.streets; }
       catch (e) { setBusy(`Context fetch failed (${(e as Error).message}); continuing without context.`); await new Promise((r) => setTimeout(r, 1200)); }
     }
-    saveProject(project); router.push(`/project/${id}`);
+    saveProject(project); router.push(`/project/?id=${id}`);
   };
 
   return (

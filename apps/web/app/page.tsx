@@ -15,9 +15,9 @@ export default function Dashboard() {
   const cloud = useCloud(); const [cloudItems, setCloudItems] = useState<Array<{ id: string; name: string; updatedAt: string; version: number }>>([]);
   const refresh = cloud.refresh;
   useEffect(() => { setItems(listProjects()); refresh().then(() => { if (cloudEnabled() && getToken()) api.listProjects().then(setCloudItems).catch(() => setCloudItems([])); }); }, [refresh]);
-  const openCloud = async (id: string) => { const r = await api.getProject(id); saveProject(r.document); useCloud.getState().bind(r.id, r.version); router.push(`/project/${r.document.id}`); };
-  const loadSample = () => { const p = sampleProject(); p.id = nanoid(8); p.name = "Sample: bar + point block"; saveProject(p); router.push(`/project/${p.id}`); };
-  const importJson = async (f: File) => { try { const p = parseProject(JSON.parse(await f.text())); p.id = nanoid(8); saveProject(p); router.push(`/project/${p.id}`); } catch (e) { alert(`Invalid project file: ${(e as Error).message}`); } };
+  const openCloud = async (id: string) => { const r = await api.getProject(id); saveProject(r.document); useCloud.getState().bind(r.id, r.version); router.push(`/project/?id=${r.document.id}`); };
+  const loadSample = () => { const p = sampleProject(); p.id = nanoid(8); p.name = "Sample: bar + point block"; saveProject(p); router.push(`/project/?id=${p.id}`); };
+  const importJson = async (f: File) => { try { const p = parseProject(JSON.parse(await f.text())); p.id = nanoid(8); saveProject(p); router.push(`/project/?id=${p.id}`); } catch (e) { alert(`Invalid project file: ${(e as Error).message}`); } };
   const totalBuildings = items.reduce((a, p) => a + p.buildings, 0);
   return (
     <main className="dots-warm min-h-screen">
@@ -25,7 +25,7 @@ export default function Dashboard() {
         <header className="mb-10 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white shadow-[0_8px_24px_rgba(255,90,31,0.45)]"><Building2 size={18} /></div>
-            <div><div className="text-[15px] font-semibold tracking-tight">SATURN</div><div className="label">Early-phase building design</div></div>
+            <div><div className="text-[15px] font-semibold tracking-tight">SATRN</div><div className="label">Early-phase building design</div></div>
           </div>
           <div className="flex items-center gap-2">
             <label className="cursor-pointer"><Btn variant="ghost" onClick={(e) => (e.currentTarget.parentElement?.querySelector("input") as HTMLInputElement)?.click()}><Upload size={14} /> Import JSON</Btn><input type="file" accept=".json" className="hidden" onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} /></label>
@@ -60,7 +60,7 @@ export default function Dashboard() {
           <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {items.map((p) => (
               <li key={p.id} className="glass group relative rounded-[18px] p-4 transition hover:border-accent/50">
-                <Link href={`/project/${p.id}`} className="block">
+                <Link href={`/project/?id=${p.id}`} className="block">
                   <div className="mb-6 flex items-center justify-between"><Chip tone="teal">{p.buildings} buildings</Chip><ArrowUpRight size={16} className="text-ink-3 transition group-hover:text-accent" /></div>
                   <div className="text-[15px] font-semibold tracking-tight">{p.name}</div>
                   <div className="mt-1 text-[11px] text-ink-3">Updated {new Date(p.updated_at).toLocaleString()}</div>

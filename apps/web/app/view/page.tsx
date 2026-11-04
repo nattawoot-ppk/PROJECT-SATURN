@@ -14,7 +14,7 @@ export default function ViewPage() {
   const load = useEditor((s) => s.load); const project = useEditor((s) => s.project); const [missing, setMissing] = useState(false);
   useEffect(() => { const p = readShareHash(window.location.hash); if (p) { useEditor.setState({ readonly: true }); load(p); } else setMissing(true); }, [load]);
   const d = useDerived();
-  if (missing) return <main className="dots p-8 text-ink-2">This link does not contain a readable project. <Link className="text-accent" href="/">Open Saturn</Link></main>;
+  if (missing) return <main className="dots p-8 text-ink-2">This link does not contain a readable project. <Link className="text-accent" href="/">Open SATRN</Link></main>;
   if (!project || !d) return <main className="dots p-8 text-ink-3">Loading…</main>;
   return (
     <div className="dots flex h-screen flex-col">
@@ -22,7 +22,7 @@ export default function ViewPage() {
         <div className="glass-soft pill flex items-center gap-2 px-3 py-1.5"><span className="h-2 w-2 rounded-full bg-accent" /><span className="text-[13px] font-semibold">{project.name}</span><span className="text-[11px] text-ink-3">/ {d.opt.name}</span></div>
         <Chip tone="neutral">Read-only share</Chip>
         <Chip tone={d.compliance.errors ? "danger" : "teal"}>{d.compliance.errors ? `${d.compliance.errors} code errors` : "Compliant"}</Chip>
-        <Link href="/" className="ml-auto text-[12px] text-ink-2 hover:text-ink">Open in Saturn →</Link>
+        <Link href="/" className="ml-auto text-[12px] text-ink-2 hover:text-ink">Open in SATRN →</Link>
       </header>
       <div className="flex min-h-0 flex-1 gap-3 px-3 pb-3">
         <main className="relative min-w-0 flex-1 overflow-hidden rounded-[22px] border border-line bg-bg-2"><Scene3D /><AnalysisBar /></main>
@@ -36,7 +36,7 @@ export default function ViewPage() {
             <StatTile label="Coverage" value={d.kpis.coverage_pct.toFixed(0)} unit="%" />
             <StatTile label="Buildings" value={String(d.kpis.building_count)} />
           </div>
-          <div className="pt-2 text-[10.5px] text-ink-3">Shared from Saturn. Analyses can be re-run here; edits are not saved.</div>
+          <div className="pt-2 text-[10.5px] text-ink-3">Shared from SATRN. Analyses can be re-run here; edits are not saved.</div>
         </aside>
       </div>
     </div>

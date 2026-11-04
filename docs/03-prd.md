@@ -1,4 +1,4 @@
-# PROJECT SATURN — Product Requirements Document
+# PROJECT SATRN — Product Requirements Document
 
 *Draft v0.1, 2026-11-04. Status: for review. Owner: Nattawoot (lineweight.design). Author: Claude (research & planning session).*
 
@@ -8,7 +8,7 @@ Companion documents: `01-spacio-research.md` (what Spacio is and how it works), 
 
 ## 1. Summary
 
-Saturn is a browser-based early-phase building design platform with full feature parity to spacio.ai: site setup from a map click, structured 3D massing with generators, live KPIs and building-code compliance, environmental analyses (sun, daylight, views, wind, noise, comfort/energy, stormwater), automatic permit drawings, collaboration, and typed BIM export. It targets architects and property developers who need to answer "what can be built here, and is it any good?" in minutes rather than weeks.
+SATRN is a browser-based early-phase building design platform with full feature parity to spacio.ai: site setup from a map click, structured 3D massing with generators, live KPIs and building-code compliance, environmental analyses (sun, daylight, views, wind, noise, comfort/energy, stormwater), automatic permit drawings, collaboration, and typed BIM export. It targets architects and property developers who need to answer "what can be built here, and is it any good?" in minutes rather than weeks.
 
 ---
 
@@ -204,5 +204,5 @@ Compliance and zoning data are jurisdiction-specific and are the hardest part of
 4. **Build vs buy for wind**: in-house LBM solver (effort, control) vs OpenFOAM batch (slower, proven) vs third-party CFD API.
 5. **Map provider**: Mapbox (fast start, cost) vs MapLibre + Overture (free, more setup).
 6. **Team and timeline**: who builds? Target for first paid launch?
-7. **Brand/name** for the product (Saturn is a codename).
+7. **Brand/name** for the product (SATRN is a codename).
 8. **Trial of Spacio**: can someone open a free account to close the [I]/[T] verification list in the research doc?

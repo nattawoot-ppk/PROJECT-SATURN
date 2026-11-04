@@ -15,7 +15,7 @@ function prism(lines: string[], ring: Ring, z0: number, z1: number, vOff: number
 }
 
 export function exportObj(option: DesignOption, site: Site, includeContext: boolean): string {
-  const lines: string[] = ["# Saturn export (metres, Z up)", `o ${option.name.replace(/\s+/g, "_")}`];
+  const lines: string[] = ["# SATRN export (metres, Z up)", `o ${option.name.replace(/\s+/g, "_")}`];
   let v = 0;
   for (const b of option.buildings) {
     lines.push(`g ${b.name.replace(/\s+/g, "_")}`);

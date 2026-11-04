@@ -1,4 +1,4 @@
-# PROJECT SATURN
+# PROJECT SATRN
 
 Early-phase building design platform (feature-parity target: spacio.ai). Feature-complete against the Spacio.ai parity list, including real-time co-editing; see `docs/05-status.md` for what is built, how it is verified and how to run it.
 

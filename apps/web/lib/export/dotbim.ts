@@ -30,5 +30,5 @@ export function exportDotbim(project: Project, opt: DesignOption, includeContext
     });
   }
   if (includeContext) for (const c of project.site.context_buildings) { const m = prismMesh(id++, c.footprint, 0, c.height_m); meshes.push(m); elements.push({ mesh_id: m.mesh_id, vector: vec, rotation: rot, guid: guid(), type: "Context", color: { r: 120, g: 125, b: 132, a: 255 }, info: { Name: c.name ?? "", Height: `${c.height_m} m`, Source: c.height_source } }); }
-  return JSON.stringify({ schema_version: "1.1.0", meshes, elements, info: { Name: project.name, Option: opt.name, Author: "Saturn", Origin: `${project.site.origin.lat}, ${project.site.origin.lon}` } });
+  return JSON.stringify({ schema_version: "1.1.0", meshes, elements, info: { Name: project.name, Option: opt.name, Author: "SATRN", Origin: `${project.site.origin.lat}, ${project.site.origin.lon}` } });
 }

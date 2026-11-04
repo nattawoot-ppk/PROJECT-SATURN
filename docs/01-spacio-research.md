@@ -1,6 +1,6 @@
 # Spacio.ai — Deep Research Teardown
 
-*Prepared 2026-11-04 for PROJECT-SATURN. Research-and-planning session only; nothing has been built.*
+*Prepared 2026-11-04 for PROJECT-SATRN. Research-and-planning session only; nothing has been built.*
 
 ---
 

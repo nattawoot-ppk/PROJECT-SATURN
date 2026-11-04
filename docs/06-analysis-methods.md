@@ -1,6 +1,6 @@
 # Analysis methods and validation status
 
-Every analysis in Saturn is an early-stage comparative tool, labelled as such in the interface. This page records the method behind each one, its inputs, and what has (and has not) been validated. Update it whenever an engine changes.
+Every analysis in SATRN is an early-stage comparative tool, labelled as such in the interface. This page records the method behind each one, its inputs, and what has (and has not) been validated. Update it whenever an engine changes.
 
 | Analysis | Method | Inputs | Outputs | Validation so far | Known limits |
 |---|---|---|---|---|---|

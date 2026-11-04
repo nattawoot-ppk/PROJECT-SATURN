@@ -11,4 +11,4 @@ The owner asked to start building before the PRD open questions were answered. T
 | Hosting region | Undecided; code is region-agnostic | None yet |
 | Stack | pnpm monorepo, TypeScript, Next.js (App Router), React Three Fiber, zod, vitest | Medium |
 | Persistence in Phase 1 | Browser localStorage for projects; server DB arrives with auth in Phase 2 | Low: same document schema |
-| Codename | "Saturn" until a product name is chosen | None |
+| Codename | "SATRN" until a product name is chosen | None |

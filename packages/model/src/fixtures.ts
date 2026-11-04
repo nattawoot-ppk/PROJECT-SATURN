@@ -12,7 +12,7 @@ export function makeBuilding(id: string, name: string, footprint: [number, numbe
 export function sampleProject(): Project {
   const now = new Date().toISOString();
   return {
-    id: "sample", schema_version: 1, name: "Sample bar + L", jurisdiction: "generic", tags: [],
+    id: "sample", schema_version: 1, name: "Sample bar + L", jurisdiction: "TH-BKK", tags: [],
     site: {
       origin: { lat: 13.7563, lon: 100.5018 },
       context_radius_m: 300,
@@ -25,7 +25,7 @@ export function sampleProject(): Project {
       ],
       street_sections: [],
       underlays: [],
-      zoning: { source: "manual", max_height_m: 24, max_storeys: 7, far_max: 2.5, coverage_pct_max: 40, setbacks: [], default_setback_m: 6, parking_per_unit: 1, custom: {} },
+      zoning: { source: "manual", zone_code: "ย.8", max_height_m: 24, max_storeys: 7, far_max: 5, coverage_pct_max: 70, osr_pct_min: 6.5, setbacks: [], default_setback_m: 6, parking_per_unit: 1, custom: { road_width_m: 16, front_setback_m: 6 } },
     },
     options: [{
       id: "opt1", name: "Option A", created_at: now, updated_at: now,
@@ -35,7 +35,7 @@ export function sampleProject(): Project {
       ],
     }],
     active_option_id: "opt1",
-    settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "generic-international", custom_rules: [] },
+    settings: { avg_unit_area_m2: 70, residents_per_unit: 2.2, storey_height_m: 3.2, currency: "EUR", rule_pack_id: "th-bangkok", custom_rules: [] },
     created_at: now, updated_at: now,
   };
 }

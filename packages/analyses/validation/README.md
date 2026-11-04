@@ -1,7 +1,7 @@
 # Wind solver validation (AIJ benchmarks)
 
 `aij.ts` builds the AIJ Case A (single 2:1:1 block) and Case B (block within a low-rise array) geometries, runs the
-Saturn lattice-Boltzmann solver, and scores it against measured pedestrian-level speed ratios when the data files
+SATRN lattice-Boltzmann solver, and scores it against measured pedestrian-level speed ratios when the data files
 `data/A.json` and `data/B.json` exist (format: `[{ "x": m, "y": m, "ratio": number }]`, block centred at the origin,
 wind from −x). The measured datasets are published by the Architectural Institute of Japan and must be obtained from
 their site (they are not redistributed here).

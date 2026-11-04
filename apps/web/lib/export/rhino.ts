@@ -6,7 +6,7 @@ import { ensureCCW, triangulate, type Ring } from "@saturn/geometry";
 type Rhino = Awaited<ReturnType<typeof rhino3dm>>;
 let rhinoPromise: Promise<Rhino> | null = null;
 // the wasm is copied to /public by the prebuild/predev scripts
-const getRhino = () => (rhinoPromise ??= rhino3dm({ locateFile: (f: string) => `/${f}` } as Parameters<typeof rhino3dm>[0]));
+const getRhino = () => (rhinoPromise ??= rhino3dm({ locateFile: (f: string) => `${process.env.NEXT_PUBLIC_BASE_PATH ?? ""}/${f}` } as Parameters<typeof rhino3dm>[0]));
 
 function prism(rh: Rhino, ring: Ring, z0: number, z1: number) {
   const r = ensureCCW(ring); const n = r.length; const mesh = new rh.Mesh();

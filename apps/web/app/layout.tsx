@@ -4,7 +4,7 @@ import { GeistMono } from "geist/font/mono";
 import "./globals.css";
 import { Analytics } from "@/components/Analytics";
 
-export const metadata: Metadata = { title: "Saturn — early-phase building design", description: "Site, massing, KPIs, code checks and analyses in the browser." };
+export const metadata: Metadata = { title: "SATRN — early-phase building design", description: "Site, massing, KPIs, code checks and analyses in the browser." };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -34,7 +34,7 @@ function titleBlock(project: Project, opt: DesignOption, title: string, subtitle
   const cw = w / cells.length;
   return `<g font-family="Helvetica, Arial, sans-serif"><rect x="${x}" y="${y}" width="${w}" height="${SHEET.titleH}" fill="none" stroke="#000" stroke-width="0.4"/>` +
     cells.map(([l, v], i) => `<line x1="${x + i * cw}" y1="${y}" x2="${x + i * cw}" y2="${y + SHEET.titleH}" stroke="#000" stroke-width="0.2"/><text x="${x + i * cw + 2}" y="${y + 7}" font-size="2.6" fill="#555">${esc(l!.toUpperCase())}</text><text x="${x + i * cw + 2}" y="${y + 17}" font-size="4.2" font-weight="bold" fill="#000">${esc(v!)}</text>`).join("") +
-    `<text x="${x + w - 2}" y="${y + SHEET.titleH - 3}" font-size="2.4" text-anchor="end" fill="#777">${esc(subtitle)} · Saturn early-phase model · not for construction</text></g>`;
+    `<text x="${x + w - 2}" y="${y + SHEET.titleH - 3}" font-size="2.4" text-anchor="end" fill="#777">${esc(subtitle)} · SATRN early-phase model · not for construction</text></g>`;
 }
 
 function frame(inner: string, project: Project, opt: DesignOption, title: string, subtitle: string, scale: number): string {

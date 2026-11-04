@@ -14,9 +14,9 @@ export function exportIfc(project: Project, opt: DesignOption): string {
   const num = (n: number) => { const s = n.toFixed(4); return s.includes(".") ? s.replace(/0+$/, "").replace(/\.$/, ".") : s + "."; };
   const now = Math.floor(Date.now() / 1000);
 
-  const person = E(`IFCPERSON($,'Saturn',$,$,$,$,$,$)`); const org = E(`IFCORGANIZATION($,'Saturn',$,$,$)`);
+  const person = E(`IFCPERSON($,'SATRN',$,$,$,$,$,$)`); const org = E(`IFCORGANIZATION($,'SATRN',$,$,$)`);
   const pao = E(`IFCPERSONANDORGANIZATION(${person},${org},$)`);
-  const app = E(`IFCAPPLICATION(${org},'0.1','Saturn','Saturn')`);
+  const app = E(`IFCAPPLICATION(${org},'0.1','SATRN','SATRN')`);
   const owner = E(`IFCOWNERHISTORY(${pao},${app},$,.ADDED.,${now},$,$,${now})`);
   const lu = E(`IFCSIUNIT(*,.LENGTHUNIT.,$,.METRE.)`); const au = E(`IFCSIUNIT(*,.AREAUNIT.,$,.SQUARE_METRE.)`); const vu = E(`IFCSIUNIT(*,.VOLUMEUNIT.,$,.CUBIC_METRE.)`); const pu = E(`IFCSIUNIT(*,.PLANEANGLEUNIT.,$,.RADIAN.)`);
   const units = E(`IFCUNITASSIGNMENT((${lu},${au},${vu},${pu}))`);
@@ -92,6 +92,6 @@ export function exportIfc(project: Project, opt: DesignOption): string {
   for (const [t, objs] of Object.entries(typed)) if (objs.length) E(`IFCRELDEFINESBYTYPE('${guid()}',${owner},$,$,(${objs.join(",")}),${t})`);
   pset(site, "Pset_SaturnSite", [["ParcelArea_m2", kpis.parcel_area_m2], ["GFA_m2", kpis.gfa_m2], ["FAR", kpis.far], ["Coverage_pct", kpis.coverage_pct], ["Units", kpis.unit_count], ["Option", opt.name]]);
 
-  const header = `ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition [ReferenceView_V1.2]'),'2;1');\nFILE_NAME('${project.name.replace(/'/g, "")}.ifc','${new Date().toISOString()}',('Saturn'),('Saturn'),'Saturn 0.1','Saturn 0.1','');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n`;
+  const header = `ISO-10303-21;\nHEADER;\nFILE_DESCRIPTION(('ViewDefinition [ReferenceView_V1.2]'),'2;1');\nFILE_NAME('${project.name.replace(/'/g, "")}.ifc','${new Date().toISOString()}',('SATRN'),('SATRN'),'SATRN 0.1','SATRN 0.1','');\nFILE_SCHEMA(('IFC4'));\nENDSEC;\nDATA;\n`;
   return header + lines.join("\n") + "\nENDSEC;\nEND-ISO-10303-21;\n";
 }

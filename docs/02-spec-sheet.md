@@ -1,6 +1,6 @@
-# PROJECT SATURN — Technical Specification Sheet
+# PROJECT SATRN — Technical Specification Sheet
 
-*Working codename: Saturn. Feature parity target: spacio.ai (see `01-spacio-research.md`). Draft v0.1, 2026-11-04. For review before any code is written.*
+*Working codename: SATRN. Feature parity target: spacio.ai (see `01-spacio-research.md`). Draft v0.1, 2026-11-04. For review before any code is written.*
 
 ---
 

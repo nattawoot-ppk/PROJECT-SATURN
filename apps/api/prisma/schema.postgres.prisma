@@ -1,4 +1,4 @@
-// Saturn API data model. SQLite for local development; switch provider to postgresql for production.
+// SATRN API data model. SQLite for local development; switch provider to postgresql for production.
 generator client {
   provider = "prisma-client-js"
 }
@@ -55,7 +55,7 @@ model Project {
   name      String
   ownerId   String?
   orgId     String?
-  document  String                           // JSON of the Saturn project document
+  document  String                           // JSON of the SATRN project document
   version   Int      @default(1)             // optimistic locking
   shareToken String? @unique
   createdAt DateTime @default(now())

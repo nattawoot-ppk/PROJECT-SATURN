@@ -1,4 +1,4 @@
-# PROJECT SATURN — Build Plan
+# PROJECT SATRN — Build Plan
 
 *Draft v0.1, 2026-11-04. Phased delivery to reach spacio.ai parity. Effort assumes 2–3 full-stack engineers plus one simulation/geometry engineer, with the owner as product/architecture lead. Adjust after decisions in PRD section 11.*
 
@@ -76,7 +76,7 @@ Solo-builder note: with one strong engineer plus AI-assisted coding, expect roug
 ## Proposed repository layout
 
 ```
-PROJECT-SATURN/
+PROJECT-SATRN/
 ├─ apps/
 │  ├─ web/            Next.js app: dashboard, editor, viewer
 │  └─ api/            NestJS API, jobs, billing, auth

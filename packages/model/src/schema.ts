@@ -182,7 +182,7 @@ export const ProjectSettingsSchema = z.object({
   storey_height_m: z.number().positive().default(3.2),
   sale_price_per_m2: z.number().nonnegative().optional(),
   currency: z.string().default("EUR"),
-  rule_pack_id: z.string().default("generic-international"),
+  rule_pack_id: z.string().default("th-bangkok"),
   custom_rules: z.array(CustomRuleSchema).default([]),
 });
 export type ProjectSettings = z.infer<typeof ProjectSettingsSchema>;
@@ -191,7 +191,7 @@ export const ProjectSchema = z.object({
   id: z.string(),
   schema_version: z.literal(1).default(1),
   name: z.string(),
-  jurisdiction: z.string().default("generic"),
+  jurisdiction: z.string().default("TH-BKK"),
   tags: z.array(z.string()).default([]),
   site: SiteSchema,
   options: z.array(DesignOptionSchema).min(1),

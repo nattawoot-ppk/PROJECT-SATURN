@@ -54,6 +54,26 @@ export function ViewsOverlay() {
   return <primitive object={mesh} />;
 }
 
+/** Traffic noise: façade Lden quads + ground Lden heatmap (45–75 dB). */
+export function NoiseOverlay() {
+  const n = useAnalysis((s) => s.noise); const overlay = useAnalysis((s) => s.overlay);
+  const mesh = useMemo(() => (n ? facadeMesh(n.facade.samples, Array.from(n.facade.lden).map((v) => Math.max(0, v - 45)), 30, 2) : null), [n]);
+  const tex = useMemo(() => {
+    if (!n) return null; const { cols, rows, lden } = n.ground; const data = new Uint8Array(cols * rows * 4);
+    for (let i = 0; i < cols * rows; i++) { const v = lden[i]!; if (v < 0) { data[i * 4 + 3] = 0; continue; } const [r, g, b] = heatColor(Math.max(0, v - 45) / 30); data[i * 4] = r * 255; data[i * 4 + 1] = g * 255; data[i * 4 + 2] = b * 255; data[i * 4 + 3] = 190; }
+    const t = new THREE.DataTexture(data, cols, rows, THREE.RGBAFormat); t.needsUpdate = true; t.magFilter = THREE.LinearFilter; return t;
+  }, [n]);
+  useEffect(() => () => { mesh?.geometry.dispose(); (mesh?.material as THREE.Material | undefined)?.dispose(); tex?.dispose(); }, [mesh, tex]);
+  if (!n || overlay !== "noise" || !tex) return null;
+  const { cols, rows, minX, minY, cell } = n.ground;
+  return (
+    <group>
+      <mesh position={[minX + (cols * cell) / 2, minY + (rows * cell) / 2, 0.06]}><planeGeometry args={[cols * cell, rows * cell]} /><meshBasicMaterial map={tex} transparent depthWrite={false} /></mesh>
+      {mesh && <primitive object={mesh} />}
+    </group>
+  );
+}
+
 /** Heatmap plane for ground sun-hours plus instanced quads on façades. */
 export function SunOverlay() {
   const sun = useAnalysis((s) => s.sun); const overlay = useAnalysis((s) => s.overlay);

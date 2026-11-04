@@ -19,7 +19,7 @@ interface EditorState {
   showEnvelope: boolean;
   showContext: boolean;
   showUnits: boolean;
-  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site";
+  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site" | "drawings";
 
   load: (p: Project) => void;
   mutate: (fn: (p: Project) => void, opts?: { history?: boolean }) => void;

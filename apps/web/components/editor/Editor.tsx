@@ -5,6 +5,10 @@ import { useEffect, useState } from "react";
 import { MousePointer2, Pentagon, Square, LandPlot, Undo2, Redo2, Download, ArrowLeft, Camera, ChevronDown } from "lucide-react";
 import { useEditor, activeOption, type Tool } from "@/lib/store";
 import { KpiPanel, CompliancePanel, ZoningPanel, BuildingPanel, OptionsPanel, SitePanel, useDerived } from "./Panels";
+import { DrawingsPanel } from "./DrawingsPanel";
+import { exportIfc } from "@/lib/export/ifc";
+import { exportDotbim } from "@/lib/export/dotbim";
+import { exportGlb } from "@/lib/export/gltf";
 import { exportObj } from "@/lib/export/obj";
 import { exportDxf } from "@/lib/export/dxf";
 import { exportExcel } from "@/lib/export/excel";
@@ -49,7 +53,7 @@ export default function Editor() {
   const snapshot = () => { const c = document.querySelector("canvas") as HTMLCanvasElement | null; if (!c) return; c.toBlob((b) => b && download(`${safe}-${opt.name}.png`, b)); };
   const panels = [
     { id: "kpi" as const, label: "KPIs" }, { id: "compliance" as const, label: "Checks", badge: d.compliance.errors ? String(d.compliance.errors) : undefined },
-    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" },
+    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" }, { id: "drawings" as const, label: "Drawings" },
   ];
   return (
     <div className="dots flex h-screen flex-col text-ink">
@@ -74,10 +78,13 @@ export default function Editor() {
                 {[
                   { l: "OBJ · 3D mesh", f: () => download(`${safe}-${opt.name}.obj`, exportObj(opt, project.site, true)) },
                   { l: "DXF · 3D faces + plans", f: () => download(`${safe}-${opt.name}.dxf`, exportDxf(opt, project.site, true), "application/dxf") },
+                  { l: "IFC 4 · storeys, walls, slabs, spaces", f: () => download(`${safe}-${opt.name}.ifc`, exportIfc(project, opt), "application/x-step") },
+                  { l: "dotBIM · .bim meshes with metadata", f: () => download(`${safe}-${opt.name}.bim`, exportDotbim(project, opt, true), "application/json") },
+                  { l: "glTF binary · for viewers and VR", f: () => exportGlb(project, opt, true).then((b) => download(`${safe}-${opt.name}.glb`, b)) },
                   { l: "Excel · KPIs, schedules, checks", f: () => download(`${safe}.xlsx`, exportExcel(project)) },
                   { l: "Project JSON", f: () => download(`${safe}.saturn.json`, JSON.stringify(project, null, 2), "application/json") },
                 ].map((x) => <button key={x.l} className="block w-full rounded-[10px] px-2.5 py-1.5 text-left text-[12.5px] hover:bg-white/10" onClick={() => { x.f(); setExp(false); }}>{x.l}</button>)}
-                <div className="px-2.5 pt-1 text-[10px] text-ink-3">IFC, Rhino 3DM, dotBIM and PDF drawings arrive in Phase 3.</div>
+                <div className="px-2.5 pt-1 text-[10px] text-ink-3">PDF drawings are in the Drawings panel. Rhino 3DM: use OBJ or IFC for now.</div>
               </div>
             )}
           </div>
@@ -103,6 +110,7 @@ export default function Editor() {
             {panel === "building" && <BuildingPanel />}
             {panel === "options" && <OptionsPanel />}
             {panel === "site" && <SitePanel />}
+            {panel === "drawings" && <DrawingsPanel />}
           </div>
         </aside>
       </div>

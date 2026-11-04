@@ -17,6 +17,7 @@
     "@saturn/geometry": "workspace:*",
     "@saturn/model": "workspace:*",
     "geist": "^1.9.0",
+    "jspdf": "^4.2.1",
     "lucide-react": "^1.68.0",
     "maplibre-gl": "^5.6.0",
     "nanoid": "^5.1.5",

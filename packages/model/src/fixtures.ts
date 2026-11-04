@@ -19,7 +19,10 @@ export function sampleProject(): Project {
       parcel: [[-40, -30], [40, -30], [40, 30], [-40, 30]],
       parcel_source: "drawn",
       context_buildings: [{ id: "c1", footprint: rectRing(70, 0, 20, 40), height_m: 18, height_source: "estimated" }],
-      streets: [],
+      streets: [
+        { id: "st-main", centreline: [[-200, -45], [200, -45]], class: "primary", name: "Main road", width_m: 16, traffic: { speed_kmh: 60, aadt: 18000, heavy_pct: 10 } },
+        { id: "st-side", centreline: [[55, -200], [55, 200]], class: "residential", name: "Side street", width_m: 8, traffic: { speed_kmh: 30, aadt: 1500, heavy_pct: 3 } },
+      ],
       street_sections: [],
       underlays: [],
       zoning: { source: "manual", max_height_m: 24, max_storeys: 7, far_max: 2.5, coverage_pct_max: 40, setbacks: [], default_setback_m: 6, parking_per_unit: 1, custom: {} },

@@ -6,7 +6,7 @@ import { useEditor, activeOption } from "@/lib/store";
 import { extrudeRing } from "@/lib/extrude";
 import { computeEnvelope, buildingHeight, evaluateRules, getRulePack, type Building } from "@saturn/model";
 import { centroid, bounds, distPointRing, ringArea, type Ring } from "@saturn/geometry";
-import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay } from "./SunOverlay";
+import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay, NoiseOverlay } from "./SunOverlay";
 import { StreetSections, Underlays } from "./SiteFeatures";
 import { UnitTiles, ParkingMeshes } from "./UnitsAndParking";
 
@@ -213,6 +213,7 @@ export default function Scene3D() {
       <SunOverlay />
       <DaylightOverlay />
       <ViewsOverlay />
+      <NoiseOverlay />
       <DraftPreview />
       <CameraRig />
     </Canvas>

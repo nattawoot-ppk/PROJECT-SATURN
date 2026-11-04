@@ -47,7 +47,7 @@ export default function Dashboard() {
             <div className="grid grid-cols-2 gap-3">
               <StatTile label="Projects" value={String(items.length)} hint="stored in this browser" bars={[3, 5, 4, 7, 6, 9, 8]} />
               <StatTile label="Buildings" value={String(totalBuildings)} tone="teal" hint="across all projects" />
-              <StatTile label="Analyses" value="3" unit="live" hint="shadows · sun hours · daylight" />
+              <StatTile label="Analyses" value="9" unit="engines" hint="sun · daylight · views · noise · wind · energy · water" />
               <StatTile label="Rule packs" value="1" hint="generic international" tone="accent" />
             </div>
           </div>

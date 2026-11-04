@@ -14,11 +14,17 @@
   - Live KPIs, zoning parameter panel with per-edge setbacks, compliance panel with autofix (clamp height/storeys, trim to envelope), buildable envelope overlay.
   - Massing generator: aligned/rotated bars, perimeter block, L-block, auto-reduced to pass rules, ranked by target GFA and compactness.
   - Exports: OBJ, DXF, Excel (KPIs per option, building and storey schedules, compliance, zoning), project JSON.
-- Verified by a headless Playwright run: sample load, draw, storey change, generate, export, no console errors.
+- `packages/analyses`: NOAA solar position, day sampling, ground/façade samplers, Tregenza 145-patch sky, VSC. 7 tests.
+- Analyses in the editor (in-browser, BVH ray casting):
+  - Real-time shadows for any date and hour (sun-position-driven light).
+  - Sun hours on ground and façades for a chosen date, heatmap overlay, stats.
+  - Façade daylight potential (Vertical Sky Component, CIE overcast sky) on design buildings and nearby neighbours, overlay, share of façade below 27 %.
+  - Results flagged stale when the model changes; every result carries a "comparative, not certified" label.
+- Verified by headless Playwright runs: sample load, draw, storey change, generate, export, sun hours, daylight, no console errors.
 
 ## Not yet (see `04-build-plan.md`)
 
-Terrain, image underlays, street sections, unit layouts and parking generator, sun/daylight/wind/noise analyses, drawings, IFC/3DM, accounts, billing, collaboration.
+Terrain, image underlays, street sections, unit layouts and parking generator, views analysis, wind, noise, comfort/energy, daylight factor per room, drawings, IFC/3DM, accounts, billing, collaboration.
 
 ## Run locally
 

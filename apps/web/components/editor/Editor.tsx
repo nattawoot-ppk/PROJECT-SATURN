@@ -8,6 +8,7 @@ import { exportObj } from "@/lib/export/obj";
 import { exportDxf } from "@/lib/export/dxf";
 import { exportExcel } from "@/lib/export/excel";
 import { download } from "@/lib/download";
+import AnalysisBar from "./AnalysisBar";
 
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => <div className="flex h-full items-center justify-center text-slate-500">Loading 3D…</div> });
 
@@ -83,8 +84,11 @@ export default function Editor() {
           {tools.map((t) => <button key={t.id} title={`${t.label} (${t.key})`} className={`flex h-9 w-9 items-center justify-center rounded text-xs font-bold ${tool === t.id ? "bg-sky-600 text-white" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`} onClick={() => setTool(t.id)}>{t.key}</button>)}
           <div className="mt-auto px-1 text-center text-[9px] leading-tight text-slate-600">Dbl-click or Enter to finish · Esc cancels · +/- storeys</div>
         </aside>
-        <main className="relative min-w-0 flex-1"><Scene3D />
-          {tool !== "select" && <div className="pointer-events-none absolute left-3 top-3 rounded bg-slate-900/80 px-3 py-1 text-xs text-slate-200">{tools.find((t) => t.id === tool)?.label}: click to place points{tool === "draw-rect" ? " (two corners)" : ", double-click or Enter to finish"}.</div>}
+        <main className="flex min-w-0 flex-1 flex-col">
+          <div className="relative min-h-0 flex-1"><Scene3D />
+            {tool !== "select" && <div className="pointer-events-none absolute left-3 top-3 rounded bg-slate-900/80 px-3 py-1 text-xs text-slate-200">{tools.find((t) => t.id === tool)?.label}: click to place points{tool === "draw-rect" ? " (two corners)" : ", double-click or Enter to finish"}.</div>}
+          </div>
+          <AnalysisBar />
         </main>
         <aside className="flex w-80 flex-col border-l border-slate-800">
           <nav className="flex border-b border-slate-800 text-xs">

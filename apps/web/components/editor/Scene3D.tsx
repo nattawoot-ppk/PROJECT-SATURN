@@ -6,6 +6,7 @@ import { useEditor, activeOption } from "@/lib/store";
 import { extrudeRing } from "@/lib/extrude";
 import { computeEnvelope, buildingHeight, type Building } from "@saturn/model";
 import { centroid, bounds, distPointRing, type Ring } from "@saturn/geometry";
+import { SunLight, SunOverlay, DaylightOverlay } from "./SunOverlay";
 
 function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [number, number] {
   const cands: [number, number][] = [...(parcel ?? []), ...env.flat()];
@@ -180,7 +181,7 @@ export default function Scene3D() {
   return (
     <Canvas shadows camera={{ fov: 45, near: 0.5, far: 5000, up: [0, 0, 1], position: [120, -160, 110] }} gl={{ antialias: true }} dpr={[1, 2]} style={{ background: "#0e141c" }}>
       <ambientLight intensity={0.55} />
-      <directionalLight position={[200, -150, 300]} intensity={1.2} castShadow shadow-mapSize={[2048, 2048]} shadow-camera-left={-300} shadow-camera-right={300} shadow-camera-top={300} shadow-camera-bottom={-300} shadow-camera-far={1000} />
+      <SunLight />
       <hemisphereLight args={["#b8d0ff", "#1a2230", 0.4]} />
       <Ground />
       <gridHelper args={[2000, 400, "#2f4260", "#1c2838"]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.01]} />
@@ -189,6 +190,8 @@ export default function Scene3D() {
       <Streets />
       {opt?.buildings.map((b) => <BuildingMesh key={b.id} b={b} selected={b.id === selectedId} />)}
       {selected && <StoreyHandle b={selected} />}
+      <SunOverlay />
+      <DaylightOverlay />
       <DraftPreview />
       <CameraRig />
     </Canvas>

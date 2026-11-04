@@ -196,6 +196,8 @@ Compliance and zoning data are jurisdiction-specific and are the hardest part of
 
 ## 11. Open questions for the owner
 
+*Build note (2026-11-04): questions 1, 4 and 5 were answered by shipping pluggable options: rule packs for generic, Norway and Thailand (Bangkok); an in-house 2D lattice-Boltzmann wind solver with an AIJ harness; a key-free MapLibre/OpenStreetMap/AWS-terrain stack with Mapbox switchable by environment variable. Pricing, hosting region, team and product name remain the owner's decisions.*
+
 1. **Launch jurisdiction and language**: Thailand (Bangkok) first, Norway/EU first, or generic international? This decides the first rule pack, data providers and hosting region.
 2. **Primary persona**: architects first (Spacio's path) or developers first (yield/visual offers)?
 3. **Pricing currency and levels**: mirror Spacio in EUR, or local pricing?

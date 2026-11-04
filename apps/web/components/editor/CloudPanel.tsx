@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Cloud, MessageSquare, Check, LogIn, UploadCloud } from "lucide-react";
+import { Cloud, MessageSquare, Check, LogIn, UploadCloud, Radio } from "lucide-react";
+import { goLive, leaveLive, useLive } from "@/lib/realtime";
 import { useEditor } from "@/lib/store";
 import { useCloud } from "@/lib/cloud";
 import { api, cloudEnabled } from "@/lib/api";
@@ -9,6 +10,7 @@ import { Btn, Chip, Divider, Input, StatTile } from "@/components/ui";
 
 export function CloudPanel() {
   const project = useEditor((s) => s.project)!; const load = useEditor((s) => s.load); const selectedId = useEditor((s) => s.selectedId);
+  const live = useLive();
   const c = useCloud(); const [comments, setComments] = useState<Awaited<ReturnType<typeof api.comments>>>([]); const [draft, setDraft] = useState("");
   const refresh = c.refresh;
   useEffect(() => { refresh(); }, [refresh]);
@@ -37,6 +39,17 @@ export function CloudPanel() {
       </div>
       <div className="flex gap-1.5"><Btn variant="primary" size="sm" disabled={c.syncing} onClick={save}><UploadCloud size={12} /> {c.syncing ? "Saving…" : c.cloudId ? "Save to cloud" : "Upload to cloud"}</Btn><Btn variant="ghost" size="sm" onClick={c.signOut}>Sign out</Btn></div>
       {c.error && <div className="text-danger">{c.error}</div>}
+      <Divider />
+      <div className="flex items-center justify-between"><div className="flex items-center gap-1.5 font-semibold"><Radio size={14} className={live.connected ? "text-teal" : "text-ink-3"} /> Live co-editing</div>
+        {c.cloudId && (live.projectId ? <Btn size="sm" variant="outline" onClick={leaveLive}>Leave</Btn> : <Btn size="sm" variant="teal" onClick={() => goLive(c.cloudId!, { id: c.me!.user.id, name: c.me!.user.name ?? c.me!.user.email })}>Go live</Btn>)}</div>
+      {!c.cloudId && <div className="text-[11px] text-ink-3">Save to cloud first, then go live to edit together.</div>}
+      {live.projectId && (
+        <div className="space-y-1 text-[12px]">
+          <div className="text-ink-2">{live.connected ? "Connected" : "Connecting…"} · {live.peers.length} other{live.peers.length === 1 ? "" : "s"} online. Edits sync instantly; the room saves to the cloud every 5 s.</div>
+          {live.peers.map((p) => <div key={p.id} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{ background: p.color }} /><span>{p.name}</span>{p.selected && <Chip tone="neutral">editing {project.options.flatMap((o) => o.buildings).find((b) => b.id === p.selected)?.name ?? "a building"}</Chip>}</div>)}
+          {live.error && <div className="text-danger">{live.error}</div>}
+        </div>
+      )}
       <Divider />
       <div className="flex items-center gap-1.5 font-semibold"><MessageSquare size={14} /> Comments {c.cloudId ? "" : "(save to cloud first)"}</div>
       {comments.map((cm) => (

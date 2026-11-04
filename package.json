@@ -14,5 +14,10 @@
   "devDependencies": {
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
+  },
+  "pnpm": {
+    "overrides": {
+      "three": "^0.180.0"
+    }
   }
 }

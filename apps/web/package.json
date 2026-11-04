@@ -8,14 +8,18 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "echo 'no web tests yet'"
+    "test": "echo 'no web tests yet'",
+    "prebuild": "node -e \"require('fs').copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\"",
+    "predev": "node -e \"require('fs').copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
     "@react-three/fiber": "^9.8.2",
+    "@react-three/xr": "^6.6.32",
     "@saturn/analyses": "workspace:*",
     "@saturn/geometry": "workspace:*",
     "@saturn/model": "workspace:*",
+    "@saturn/realtime": "workspace:*",
     "geist": "^1.9.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.68.0",
@@ -25,9 +29,12 @@
     "next": "15.5.29",
     "react": "19.1.0",
     "react-dom": "19.1.0",
+    "rhino3dm": "^8.35.0",
     "three": "^0.180.0",
     "three-mesh-bvh": "^0.9.18",
     "xlsx": "^0.18.5",
+    "y-websocket": "^3.1.0",
+    "yjs": "^13.6.33",
     "zustand": "^5.0.16"
   },
   "devDependencies": {
@@ -41,6 +48,7 @@
     "eslint": "^9",
     "eslint-config-next": "15.5.29",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack": "^5.112.2"
   }
 }

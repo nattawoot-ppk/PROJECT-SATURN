@@ -11,6 +11,8 @@ import { CloudPanel } from "./CloudPanel";
 import { exportIfc } from "@/lib/export/ifc";
 import { exportDotbim } from "@/lib/export/dotbim";
 import { exportGlb } from "@/lib/export/gltf";
+import { exportRhino3dm } from "@/lib/export/rhino";
+import { XRButton } from "./XRButton";
 import { exportObj } from "@/lib/export/obj";
 import { exportDxf } from "@/lib/export/dxf";
 import { exportExcel } from "@/lib/export/excel";
@@ -74,6 +76,7 @@ export default function Editor() {
           <span className="mono hidden whitespace-nowrap text-[11.5px] text-ink-2 xl:inline">GFA {Math.round(d.kpis.gfa_m2).toLocaleString()} m² · FAR {d.kpis.far.toFixed(2)} · {d.kpis.unit_count} units</span>
           <IconBtn onClick={undo} title="Undo (Ctrl+Z)"><Undo2 size={15} /></IconBtn>
           <IconBtn onClick={redo} title="Redo (Ctrl+Shift+Z)"><Redo2 size={15} /></IconBtn>
+          <XRButton />
           <IconBtn onClick={snapshot} title="Snapshot PNG"><Camera size={15} /></IconBtn>
           <IconBtn onClick={() => { const { url, bytes } = makeShareUrl(project, window.location.origin); navigator.clipboard?.writeText(url).then(() => alert(`Read-only link copied (${Math.round(bytes / 1024)} KB).`), () => prompt("Read-only link:", url)); }} title="Copy read-only share link"><Share2 size={15} /></IconBtn>
           <div className="relative">
@@ -85,11 +88,12 @@ export default function Editor() {
                   { l: "DXF · 3D faces + plans", f: () => download(`${safe}-${opt.name}.dxf`, exportDxf(opt, project.site, true), "application/dxf") },
                   { l: "IFC 4 · storeys, walls, slabs, spaces", f: () => download(`${safe}-${opt.name}.ifc`, exportIfc(project, opt), "application/x-step") },
                   { l: "dotBIM · .bim meshes with metadata", f: () => download(`${safe}-${opt.name}.bim`, exportDotbim(project, opt, true), "application/json") },
+                  { l: "Rhino 3DM · layers per building, units, context", f: () => exportRhino3dm(project, opt, true).then((bytes) => download(`${safe}-${opt.name}.3dm`, new Blob([bytes as BlobPart], { type: "application/octet-stream" }))) },
                   { l: "glTF binary · for viewers and VR", f: () => exportGlb(project, opt, true).then((b) => download(`${safe}-${opt.name}.glb`, b)) },
                   { l: "Excel · KPIs, schedules, checks", f: () => download(`${safe}.xlsx`, exportExcel(project)) },
                   { l: "Project JSON", f: () => download(`${safe}.saturn.json`, JSON.stringify(project, null, 2), "application/json") },
                 ].map((x) => <button key={x.l} className="block w-full rounded-[10px] px-2.5 py-1.5 text-left text-[12.5px] hover:bg-white/10" onClick={() => { x.f(); setExp(false); }}>{x.l}</button>)}
-                <div className="px-2.5 pt-1 text-[10px] text-ink-3">PDF drawings are in the Drawings panel. Rhino 3DM: use OBJ or IFC for now.</div>
+                <div className="px-2.5 pt-1 text-[10px] text-ink-3">PDF drawings are in the Drawings panel.</div>
               </div>
             )}
           </div>

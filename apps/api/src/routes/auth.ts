@@ -3,6 +3,7 @@ import { z } from "zod";
 import { nanoid } from "nanoid";
 import { db } from "../db.js";
 import { issueSession, userFromRequest, COOKIE } from "../auth.js";
+import { sendMail, magicLinkMail } from "../mail.js";
 
 /** Passwordless email login. Without an email provider configured, the magic link is returned in the response (dev mode) and logged. */
 export async function authRoutes(app: FastifyInstance) {
@@ -12,9 +13,10 @@ export async function authRoutes(app: FastifyInstance) {
     const token = nanoid(32);
     await db.magicToken.create({ data: { token, userId: user.id, expiresAt: new Date(Date.now() + 15 * 60 * 1000) } });
     const link = `${process.env.APP_ORIGIN ?? "http://localhost:3000"}/auth/callback?token=${token}`;
-    app.log.info({ email, link }, "magic link issued");
-    const dev = !process.env.EMAIL_PROVIDER;
-    return reply.send({ ok: true, ...(dev ? { dev_link: link } : {}) });
+    const sent = await sendMail(magicLinkMail(email, link), (o, m) => app.log.info(o, m));
+    if (!sent.ok) return reply.code(502).send({ error: `email delivery failed (${sent.provider})` });
+    if (sent.provider === "dev") app.log.info({ email, link }, "magic link (dev mode)");
+    return reply.send({ ok: true, provider: sent.provider, ...(sent.provider === "dev" ? { dev_link: link } : {}) });
   });
   app.post("/auth/verify", async (req, reply) => {
     const { token } = z.object({ token: z.string() }).parse(req.body);

@@ -92,7 +92,8 @@ export function buildingCtx(b: Building) {
 
 export function evaluateRules(pack: RulePack, option: DesignOption, site: Site, settings: ProjectSettings, kpis?: Kpis): ComplianceResult {
   const k = kpis ?? computeKpis(option, site, settings);
-  const zoning: ZoningParams = { ...(pack.defaults ?? {}), ...site.zoning } as ZoningParams;
+  // pack defaults fill only parameters the project leaves unset; custom maps merge
+  const zoning: ZoningParams = { ...(pack.defaults ?? {}), ...Object.fromEntries(Object.entries(site.zoning).filter(([, v]) => v !== undefined && v !== null)), custom: { ...(pack.defaults?.custom ?? {}), ...(site.zoning.custom ?? {}) } } as ZoningParams;
   const base = { kpi: k, zoning, settings, site: { has_parcel: !!site.parcel } };
   const envelope = computeEnvelope(site);
   const findings: Finding[] = [];

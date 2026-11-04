@@ -40,3 +40,11 @@ describe("api", () => {
     const co = await app.inject({ method: "POST", url: "/billing/checkout", headers: auth, payload: { orgId, plan: "pro" } }); expect(co.statusCode).toBe(501);
   });
 });
+
+describe("sso and mail", () => {
+  it("reports SSO as disabled without configuration and keeps dev-mode links", async () => {
+    const c = await app.inject({ method: "GET", url: "/auth/sso/config" }); expect(c.json().enabled).toBe(false);
+    const s = await app.inject({ method: "GET", url: "/auth/sso/start" }); expect(s.statusCode).toBe(501);
+    const ml = await app.inject({ method: "POST", url: "/auth/magic-link", payload: { email: "b@example.com" } }); expect(ml.json().provider).toBe("dev"); expect(ml.json().dev_link).toContain("/auth/callback?token=");
+  });
+});

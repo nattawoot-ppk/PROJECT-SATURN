@@ -1,6 +1,9 @@
 "use client";
 import { Canvas, useThree, type ThreeEvent } from "@react-three/fiber";
 import { OrbitControls, Line, Html } from "@react-three/drei";
+import { XR } from "@react-three/xr";
+import { xrStore } from "@/lib/xrStore";
+import { useLive } from "@/lib/realtime";
 import { useMemo, useRef, useEffect, useState } from "react";
 import { useEditor, activeOption } from "@/lib/store";
 import { extrudeRing } from "@/lib/extrude";
@@ -19,6 +22,7 @@ function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [num
 }
 
 function BuildingMesh({ b, selected, violation }: { b: Building; selected: boolean; violation: boolean }) {
+  const peer = useLive((s) => s.peers.find((p) => p.selected === b.id));
   const select = useEditor((s) => s.select);
   const tool = useEditor((s) => s.tool);
   const terrain = useEditor((s) => s.project?.site.terrain);
@@ -60,12 +64,12 @@ function BuildingMesh({ b, selected, violation }: { b: Building; selected: boole
           <mesh geometry={x.g} castShadow receiveShadow>
             <meshStandardMaterial color={color} emissive={selected ? "#ff5a1f" : violation ? "#ff3b3b" : "#000"} emissiveIntensity={selected ? 0.45 : violation ? 0.35 : 0} roughness={0.9} metalness={0.05} transparent={hasUnits} opacity={hasUnits ? 0.28 : 1} depthWrite={!hasUnits} />
           </mesh>
-          <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#ff5a1f" : violation ? "#ff7a7a" : "#2a2f36"} lineWidth={selected ? 1.5 : 0.7} />
+          <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#ff5a1f" : peer ? peer.color : violation ? "#ff7a7a" : "#2a2f36"} lineWidth={selected || peer ? 1.5 : 0.7} />
         </group>
       ))}
       <Html position={[top[0], top[1], base + h + 2.5]} center distanceFactor={220} zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
         <div className={`whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-lg backdrop-blur-md ${violation ? "border-red-400/60 bg-red-500/20 text-red-100" : selected ? "border-orange-400/70 bg-orange-500/20 text-orange-50" : "border-white/15 bg-black/55 text-white/85"}`}>
-          <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${violation ? "bg-red-400" : "bg-orange-400"}`} />{b.name} · {b.storeys.length} st · {Math.round(gfa).toLocaleString()} m²
+          <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${violation ? "bg-red-400" : "bg-orange-400"}`} />{b.name} · {b.storeys.length} st · {Math.round(gfa).toLocaleString()} m²{peer && <span className="ml-1.5 rounded-full px-1.5 text-[9px] text-black" style={{ background: peer.color }}>{peer.name}</span>}
         </div>
       </Html>
     </group>
@@ -201,6 +205,7 @@ export default function Scene3D() {
   }, [project, opt]);
   return (
     <Canvas shadows camera={{ fov: 45, near: 0.5, far: 5000, up: [0, 0, 1], position: [120, -160, 110] }} gl={{ antialias: true }} dpr={[1, 2]} style={{ background: "#0d1014" }}>
+      <XR store={xrStore}>
       <ambientLight intensity={0.55} />
       <SunLight />
       <hemisphereLight args={["#cfd8e6", "#0d1014", 0.5]} />
@@ -223,6 +228,7 @@ export default function Scene3D() {
       <WindOverlay />
       <DraftPreview />
       <CameraRig />
+      </XR>
     </Canvas>
   );
 }

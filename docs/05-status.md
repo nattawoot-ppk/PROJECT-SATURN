@@ -34,10 +34,22 @@
 - Billing: plan catalogue, Stripe Checkout session creation and webhook handler (active once keys are configured; returns 501 otherwise).
 - SQLite for development, Postgres for production (change the Prisma datasource provider). 2 integration tests cover the whole flow.
 - Web: sign-in pages, Cloud panel (upload/save, conflict handling, comments), cloud project list on the dashboard. Enabled by `NEXT_PUBLIC_API_URL`.
+- **Real-time co-editing**: Yjs rooms served by the API over WebSocket (y-websocket protocol); per-building merge of concurrent edits, presence with coloured outlines and name tags on the model, autosave of the merged document every 5 s. Shared mapping lives in `packages/realtime` (tests cover round-trip, concurrent merge and deletion); an API integration test syncs two clients and checks persistence.
+- **Email delivery** for magic links: Resend or a generic webhook (first configured wins); dev mode returns the link.
+- **Single sign-on**: OpenID Connect authorization-code flow (Google Workspace, Microsoft Entra, Okta, Auth0, Keycloak) with JWKS-verified ID tokens, optional allowed domains and auto-join of an organisation.
 
-## Not yet
+**Rule packs**: generic international, Norway reference (pbl/TEK17: %-BYA, %-BRA, gesims/møne, 4 m boundary, room height, daylight, parking) and Thailand · Bangkok (Ministerial Regulation 55/33: FAR/OSR per zone, 2× road-width height rule, high-rise and extra-large building road access and setbacks, open space, window distances, parking, EIA threshold). Switch in the Zoning panel.
 
-Real-time multi-cursor co-editing (CRDT): the model is JSON-document based and ready for Yjs, but the sync server is not built; collaboration today is save-with-locking plus comments. SSO (SAML), email delivery provider for magic links (dev mode prints the link), Rhino 3DM export (use OBJ/IFC meanwhile), WebXR VR (use the glTF export in a headset browser), jurisdiction-specific rule packs and zoning auto-lookup beyond the generic pack, wind validation against AIJ cases.
+**More outputs**: Rhino 3DM export (layers per building, unit polylines, context, streets, user text), WebXR button for VR headsets and AR phones (appears when the browser supports immersive sessions).
+
+**Wind validation harness**: `packages/analyses/validation/aij.ts` builds AIJ cases A and B, scores the solver against measured points when the datasets are supplied, and checks the qualitative pattern in a test.
+
+## Remaining
+
+- Quantitative AIJ scoring needs the measured datasets (not redistributable); the harness and qualitative test are in place.
+- Zoning auto-lookup from municipal services (parameters are entered manually; packs supply defaults and rules).
+- SAML (OIDC covers the common identity providers).
+- Production deployment: Postgres datasource, Stripe keys and webhook signature verification, an email provider key.
 
 ## Verification
 
@@ -60,4 +72,4 @@ pnpm dev:api            # API on http://localhost:4000
 pnpm dev
 ```
 
-Tests: `pnpm test` (51 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.
+Tests: `pnpm test` (61 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.

@@ -1,0 +1,25 @@
+# Production-shaped stack: Postgres, API (with real-time rooms), web. Fill infra/.env from infra/.env.example.
+services:
+  db:
+    image: postgres:16-alpine
+    environment: { POSTGRES_USER: saturn, POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-saturn}, POSTGRES_DB: saturn }
+    volumes: [ "pgdata:/var/lib/postgresql/data" ]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U saturn"], interval: 5s, timeout: 3s, retries: 20 }
+  api:
+    build: { context: .., dockerfile: apps/api/Dockerfile }
+    env_file: [ .env ]
+    environment:
+      DATABASE_URL: postgresql://saturn:${POSTGRES_PASSWORD:-saturn}@db:5432/saturn
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:3000}
+      API_ORIGIN: ${API_ORIGIN:-http://localhost:4000}
+    depends_on: { db: { condition: service_healthy } }
+    ports: [ "4000:4000" ]
+  web:
+    build:
+      context: ..
+      dockerfile: apps/web/Dockerfile
+      args: { NEXT_PUBLIC_API_URL: ${API_ORIGIN:-http://localhost:4000}, NEXT_PUBLIC_MAP_STYLE: ${NEXT_PUBLIC_MAP_STYLE:-} }
+    depends_on: [ api ]
+    ports: [ "3000:3000" ]
+volumes:
+  pgdata: {}

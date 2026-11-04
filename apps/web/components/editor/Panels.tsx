@@ -12,6 +12,7 @@ import { Btn, Chip, Divider, Field, Input, Num, Select, StatTile } from "@/compo
 import { StreetSectionsPanel, UnderlaysPanel } from "./SiteFeaturePanels";
 import { UnitsPanel } from "./UnitsPanel";
 import { CustomRulesPanel } from "./CustomRulesPanel";
+import { lookupZoning, applyLookup, BANGKOK_ZONES } from "@/lib/providers/zoning";
 
 export function useDerived() {
   const project = useEditor((s) => s.project);
@@ -80,12 +81,25 @@ export function CompliancePanel() {
 
 export function ZoningPanel() {
   const project = useEditor((s) => s.project); const setZoning = useEditor((s) => s.setZoning); const mutate = useEditor((s) => s.mutate);
+  const [lookup, setLookup] = useState<string>("");
   if (!project) return null;
   const z = project.site.zoning; const n = project.site.parcel?.length ?? 0;
+  const auto = async () => {
+    setLookup("Looking up zoning…");
+    const r = await lookupZoning(project.settings.rule_pack_id, project.site.origin, project.site.parcel);
+    if (!r) { setLookup("No zoning service returned data for this location. Enter the parameters from the local plan."); return; }
+    setZoning((zz) => { applyLookup(zz, r, true); });
+    setLookup(`${r.source}: zone ${r.zone_code ?? "—"}${r.zone_name ? ` (${r.zone_name})` : ""}. ${r.notes ?? ""}`);
+  };
   return (
     <div className="space-y-3">
       <Field label="Rule pack"><Select value={project.settings.rule_pack_id} onChange={(e) => mutate((p) => { p.settings.rule_pack_id = e.target.value; })}>{RULE_PACKS.map((p) => <option key={p.id} value={p.id}>{p.name} v{p.version}</option>)}</Select></Field>
-      <Field label="Zone code"><Input value={z.zone_code ?? ""} onChange={(e) => setZoning((zz) => { zz.zone_code = e.target.value || undefined; })} /></Field>
+      <div className="flex items-end gap-2">
+        <Field label="Zone code" className="flex-1"><Input value={z.zone_code ?? ""} list={project.settings.rule_pack_id === "th-bangkok" ? "bkk-zones" : undefined} onChange={(e) => { const code = e.target.value; setZoning((zz) => { zz.zone_code = code || undefined; const t = project.settings.rule_pack_id === "th-bangkok" ? BANGKOK_ZONES[code] : undefined; if (t) { zz.far_max = t.far; zz.osr_pct_min = t.osr; zz.allowed_uses = t.uses; zz.source = "auto"; } }); }} /></Field>
+        <Btn size="sm" variant="ghost" onClick={auto}>Auto-lookup</Btn>
+      </div>
+      {project.settings.rule_pack_id === "th-bangkok" && <datalist id="bkk-zones">{Object.entries(BANGKOK_ZONES).map(([k, v]) => <option key={k} value={k}>{v.name} · FAR {v.far} · OSR {v.osr} %</option>)}</datalist>}
+      {lookup && <div className="text-[11px] text-ink-2">{lookup}</div>}
       <div className="grid grid-cols-2 gap-2">
         <Num label="Max height (m)" value={z.max_height_m} step={0.5} onChange={(v) => setZoning((zz) => { zz.max_height_m = v; })} />
         <Num label="Max storeys" value={z.max_storeys} onChange={(v) => setZoning((zz) => { zz.max_storeys = v; })} />

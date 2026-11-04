@@ -16,6 +16,7 @@ pnpm test
 | [docs/04-build-plan.md](docs/04-build-plan.md) | Phased delivery plan, effort, repo layout, first sprint |
 | [docs/05-status.md](docs/05-status.md) | What is built, what is not, how to run |
 | [docs/06-analysis-methods.md](docs/06-analysis-methods.md) | Method, inputs, validation status and limits of every analysis |
+| [docs/07-deployment.md](docs/07-deployment.md) | Docker Compose stack, secrets table, hosting notes, CI |
 | [docs/decisions/](docs/decisions/) | Architecture decision records |
 
 Layout: `apps/web` (Next.js editor), `apps/api` (Fastify + Prisma cloud API), `packages/model` (schema, KPIs, rules, generators), `packages/geometry` (polygon and terrain ops), `packages/analyses` (solar, sky, noise, wind, energy, water).

@@ -47,12 +47,17 @@
 
 **Wind validation harness**: `packages/analyses/validation/aij.ts` builds AIJ cases A and B, scores the solver against measured points when the datasets are supplied, and checks the qualitative pattern in a test.
 
-## Remaining
+**Zoning auto-lookup**: provider chain with source attribution: Geonorge reguleringsplan WMS (Norway), Bangkok City Planning ArcGIS identify (Thailand) plus a built-in Bangkok Comprehensive Plan zone table (FAR/OSR/uses by code, with a zone-code picker), and OpenStreetMap landuse worldwide for allowed uses. Parameters stay editable; every value shows its source.
 
-- Quantitative AIJ scoring needs the measured datasets (not redistributable); the harness and qualitative test are in place.
-- Zoning auto-lookup from municipal services (parameters are entered manually; packs supply defaults and rules).
-- SAML (OIDC covers the common identity providers).
-- Production deployment: Postgres datasource, Stripe keys and webhook signature verification, an email provider key.
+**Enterprise SSO**: SAML 2.0 service provider (SP-initiated, signed assertions, metadata endpoint) alongside OIDC; tests cover metadata, redirect and rejection of invalid responses.
+
+**Wind validation**: quantitative tests against closed-form solutions (plane Poiseuille profile within 5 % L2 error; bluff-body flank speed-up within the physical band) in addition to the AIJ harness; `validation/fetch-aij.mjs` downloads and converts the AIJ datasets on an internet-connected machine, after which `validate:aij` reports the hit rate.
+
+**Deployment**: Dockerfiles for API and web, Postgres Prisma schema, Docker Compose stack with health checks, GitHub Actions CI (typecheck, tests, lint, build, images), and `07-deployment.md` with the full secrets table.
+
+## Operational prerequisites (not engineering work)
+
+Provide production credentials in `infra/.env`: database password, JWT secret, an email provider key, Stripe products and webhook secret, and, if wanted, OIDC/SAML identity-provider settings and a Mapbox style. Run the AIJ fetch script once to obtain the benchmark datasets.
 
 ## Verification
 
@@ -75,4 +80,4 @@ pnpm dev:api            # API on http://localhost:4000
 pnpm dev
 ```
 
-Tests: `pnpm test` (63 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.
+Tests: `pnpm test` (67 unit and integration tests). Typecheck: `pnpm typecheck`. Lint: `pnpm lint`.

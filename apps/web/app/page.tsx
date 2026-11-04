@@ -7,10 +7,15 @@ import { listProjects, saveProject, deleteProject, type ProjectSummary } from "@
 import { sampleProject, parseProject } from "@saturn/model";
 import { nanoid } from "nanoid";
 import { Btn, StatTile, Chip } from "@/components/ui";
+import { api, cloudEnabled, getToken } from "@/lib/api";
+import { useCloud } from "@/lib/cloud";
 
 export default function Dashboard() {
   const [items, setItems] = useState<ProjectSummary[]>([]); const router = useRouter();
-  useEffect(() => { setItems(listProjects()); }, []);
+  const cloud = useCloud(); const [cloudItems, setCloudItems] = useState<Array<{ id: string; name: string; updatedAt: string; version: number }>>([]);
+  const refresh = cloud.refresh;
+  useEffect(() => { setItems(listProjects()); refresh().then(() => { if (cloudEnabled() && getToken()) api.listProjects().then(setCloudItems).catch(() => setCloudItems([])); }); }, [refresh]);
+  const openCloud = async (id: string) => { const r = await api.getProject(id); saveProject(r.document); useCloud.getState().bind(r.id, r.version); router.push(`/project/${r.document.id}`); };
   const loadSample = () => { const p = sampleProject(); p.id = nanoid(8); p.name = "Sample: bar + point block"; saveProject(p); router.push(`/project/${p.id}`); };
   const importJson = async (f: File) => { try { const p = parseProject(JSON.parse(await f.text())); p.id = nanoid(8); saveProject(p); router.push(`/project/${p.id}`); } catch (e) { alert(`Invalid project file: ${(e as Error).message}`); } };
   const totalBuildings = items.reduce((a, p) => a + p.buildings, 0);
@@ -25,6 +30,7 @@ export default function Dashboard() {
           <div className="flex items-center gap-2">
             <label className="cursor-pointer"><Btn variant="ghost" onClick={(e) => (e.currentTarget.parentElement?.querySelector("input") as HTMLInputElement)?.click()}><Upload size={14} /> Import JSON</Btn><input type="file" accept=".json" className="hidden" onChange={(e) => e.target.files?.[0] && importJson(e.target.files[0])} /></label>
             <Btn variant="ghost" onClick={loadSample}><Sparkles size={14} /> Open sample</Btn>
+            {cloudEnabled() && (cloud.me ? <Chip tone="teal">{cloud.me.user.email}</Chip> : <Link href="/auth"><Btn variant="outline">Sign in</Btn></Link>)}
             <Link href="/new"><Btn variant="primary"><Plus size={14} /> New project</Btn></Link>
           </div>
         </header>
@@ -64,7 +70,13 @@ export default function Dashboard() {
             ))}
           </ul>
         )}
-        <p className="mt-10 text-[11px] text-ink-3">Projects are stored in this browser (Phase 1). Accounts and cloud storage arrive in Phase 2.</p>
+        {cloudItems.length > 0 && (
+          <>
+            <div className="mb-3 mt-8 flex items-center justify-between"><div className="label">Cloud projects</div><Chip tone="teal">{cloudItems.length}</Chip></div>
+            <ul className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">{cloudItems.map((p) => <li key={p.id} className="glass rounded-[18px] p-4"><button className="w-full text-left" onClick={() => openCloud(p.id)}><div className="mb-4 flex items-center justify-between"><Chip tone="teal">v{p.version}</Chip><ArrowUpRight size={16} className="text-ink-3" /></div><div className="text-[15px] font-semibold">{p.name}</div><div className="mt-1 text-[11px] text-ink-3">Saved {new Date(p.updatedAt).toLocaleString()}</div></button></li>)}</ul>
+          </>
+        )}
+        <p className="mt-10 text-[11px] text-ink-3">{cloudEnabled() ? "Projects are stored in this browser until you save them to the cloud." : "Projects are stored in this browser. Configure NEXT_PUBLIC_API_URL to enable accounts and cloud storage."}</p>
       </div>
     </main>
   );

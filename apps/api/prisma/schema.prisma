@@ -1,0 +1,85 @@
+// Saturn API data model. SQLite for local development; switch provider to postgresql for production.
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  createdAt DateTime @default(now())
+  memberships Membership[]
+  projects  Project[]
+  comments  Comment[]
+  tokens    MagicToken[]
+}
+
+model MagicToken {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  expiresAt DateTime
+  usedAt    DateTime?
+}
+
+model Organisation {
+  id        String   @id @default(cuid())
+  name      String
+  plan      String   @default("free")        // free | starter | pro | business
+  seats     Int      @default(1)             // floating concurrent seats (business)
+  stripeCustomerId String?
+  createdAt DateTime @default(now())
+  members   Membership[]
+  projects  Project[]
+}
+
+model Membership {
+  id     String @id @default(cuid())
+  userId String
+  orgId  String
+  role   String @default("member")          // owner | admin | member | viewer
+  user   User         @relation(fields: [userId], references: [id])
+  org    Organisation @relation(fields: [orgId], references: [id])
+  @@unique([userId, orgId])
+}
+
+model Project {
+  id        String   @id
+  name      String
+  ownerId   String?
+  orgId     String?
+  document  String                           // JSON of the Saturn project document
+  version   Int      @default(1)             // optimistic locking
+  shareToken String? @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  owner     User?         @relation(fields: [ownerId], references: [id])
+  org       Organisation? @relation(fields: [orgId], references: [id])
+  comments  Comment[]
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  projectId String
+  authorId  String
+  body      String
+  anchor    String?                           // JSON: { optionId, buildingId?, point? }
+  resolved  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  project   Project @relation(fields: [projectId], references: [id])
+  author    User    @relation(fields: [authorId], references: [id])
+}
+
+model SeatLease {
+  id       String   @id @default(cuid())
+  orgId    String
+  userId   String
+  lastSeen DateTime @default(now())
+  @@unique([orgId, userId])
+}

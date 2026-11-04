@@ -7,6 +7,7 @@ import { useEditor, activeOption, type Tool } from "@/lib/store";
 import { KpiPanel, CompliancePanel, ZoningPanel, BuildingPanel, OptionsPanel, SitePanel, useDerived } from "./Panels";
 import { DrawingsPanel } from "./DrawingsPanel";
 import { PerformancePanel } from "./PerformancePanel";
+import { CloudPanel } from "./CloudPanel";
 import { exportIfc } from "@/lib/export/ifc";
 import { exportDotbim } from "@/lib/export/dotbim";
 import { exportGlb } from "@/lib/export/gltf";
@@ -56,7 +57,7 @@ export default function Editor() {
   const snapshot = () => { const c = document.querySelector("canvas") as HTMLCanvasElement | null; if (!c) return; c.toBlob((b) => b && download(`${safe}-${opt.name}.png`, b)); };
   const panels = [
     { id: "kpi" as const, label: "KPIs" }, { id: "compliance" as const, label: "Checks", badge: d.compliance.errors ? String(d.compliance.errors) : undefined },
-    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" }, { id: "performance" as const, label: "Performance" }, { id: "drawings" as const, label: "Drawings" },
+    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" }, { id: "performance" as const, label: "Performance" }, { id: "drawings" as const, label: "Drawings" }, { id: "cloud" as const, label: "Cloud" },
   ];
   return (
     <div className="dots flex h-screen flex-col text-ink">
@@ -116,6 +117,7 @@ export default function Editor() {
             {panel === "site" && <SitePanel />}
             {panel === "drawings" && <DrawingsPanel />}
             {panel === "performance" && <PerformancePanel />}
+            {panel === "cloud" && <CloudPanel />}
           </div>
         </aside>
       </div>

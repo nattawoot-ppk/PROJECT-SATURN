@@ -20,7 +20,7 @@ interface EditorState {
   showContext: boolean;
   showUnits: boolean;
   readonly: boolean;
-  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site" | "drawings" | "performance";
+  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site" | "drawings" | "performance" | "cloud";
 
   load: (p: Project) => void;
   mutate: (fn: (p: Project) => void, opts?: { history?: boolean }) => void;

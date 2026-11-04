@@ -6,6 +6,7 @@ import { MousePointer2, Pentagon, Square, LandPlot, Undo2, Redo2, Download, Arro
 import { useEditor, activeOption, type Tool } from "@/lib/store";
 import { KpiPanel, CompliancePanel, ZoningPanel, BuildingPanel, OptionsPanel, SitePanel, useDerived } from "./Panels";
 import { DrawingsPanel } from "./DrawingsPanel";
+import { PerformancePanel } from "./PerformancePanel";
 import { exportIfc } from "@/lib/export/ifc";
 import { exportDotbim } from "@/lib/export/dotbim";
 import { exportGlb } from "@/lib/export/gltf";
@@ -15,6 +16,8 @@ import { exportExcel } from "@/lib/export/excel";
 import { download } from "@/lib/download";
 import AnalysisBar from "./AnalysisBar";
 import { Btn, Chip, IconBtn, Segmented } from "@/components/ui";
+import { makeShareUrl } from "@/lib/share";
+import { Share2 } from "lucide-react";
 
 const Scene3D = dynamic(() => import("./Scene3D"), { ssr: false, loading: () => <div className="flex h-full items-center justify-center text-ink-3">Loading 3D…</div> });
 
@@ -53,7 +56,7 @@ export default function Editor() {
   const snapshot = () => { const c = document.querySelector("canvas") as HTMLCanvasElement | null; if (!c) return; c.toBlob((b) => b && download(`${safe}-${opt.name}.png`, b)); };
   const panels = [
     { id: "kpi" as const, label: "KPIs" }, { id: "compliance" as const, label: "Checks", badge: d.compliance.errors ? String(d.compliance.errors) : undefined },
-    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" }, { id: "drawings" as const, label: "Drawings" },
+    { id: "zoning" as const, label: "Zoning" }, { id: "building" as const, label: "Building" }, { id: "options" as const, label: "Options" }, { id: "site" as const, label: "Site" }, { id: "performance" as const, label: "Performance" }, { id: "drawings" as const, label: "Drawings" },
   ];
   return (
     <div className="dots flex h-screen flex-col text-ink">
@@ -61,16 +64,17 @@ export default function Editor() {
         <Link href="/" className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-panel text-ink-2 hover:text-ink"><ArrowLeft size={16} /></Link>
         <div className="glass-soft pill flex items-center gap-2 px-3 py-1.5">
           <span className="h-2 w-2 rounded-full bg-accent" />
-          <input className="bg-transparent text-[13px] font-semibold tracking-tight focus:outline-none" value={project.name} onChange={(e) => mutate((p) => { p.name = e.target.value; }, { history: false })} />
-          <span className="text-[11px] text-ink-3">/ {opt.name}</span>
+          <input className="w-44 min-w-0 bg-transparent text-[13px] font-semibold tracking-tight focus:outline-none" value={project.name} onChange={(e) => mutate((p) => { p.name = e.target.value; }, { history: false })} />
+          <span className="whitespace-nowrap text-[11px] text-ink-3">/ {opt.name}</span>
         </div>
         <Segmented value={panel} options={panels} onChange={setPanel} className="ml-2" />
         <div className="ml-auto flex items-center gap-2">
           <Chip tone={d.compliance.errors ? "danger" : "teal"}>{d.compliance.errors ? `${d.compliance.errors} code errors` : "Compliant"}</Chip>
-          <span className="mono text-[11.5px] text-ink-2">GFA {Math.round(d.kpis.gfa_m2).toLocaleString()} m² · FAR {d.kpis.far.toFixed(2)} · {d.kpis.unit_count} units</span>
+          <span className="mono hidden whitespace-nowrap text-[11.5px] text-ink-2 xl:inline">GFA {Math.round(d.kpis.gfa_m2).toLocaleString()} m² · FAR {d.kpis.far.toFixed(2)} · {d.kpis.unit_count} units</span>
           <IconBtn onClick={undo} title="Undo (Ctrl+Z)"><Undo2 size={15} /></IconBtn>
           <IconBtn onClick={redo} title="Redo (Ctrl+Shift+Z)"><Redo2 size={15} /></IconBtn>
           <IconBtn onClick={snapshot} title="Snapshot PNG"><Camera size={15} /></IconBtn>
+          <IconBtn onClick={() => { const { url, bytes } = makeShareUrl(project, window.location.origin); navigator.clipboard?.writeText(url).then(() => alert(`Read-only link copied (${Math.round(bytes / 1024)} KB).`), () => prompt("Read-only link:", url)); }} title="Copy read-only share link"><Share2 size={15} /></IconBtn>
           <div className="relative">
             <Btn variant="primary" onClick={() => setExp(!exp)}><Download size={14} /> Export <ChevronDown size={12} /></Btn>
             {exp && (
@@ -111,6 +115,7 @@ export default function Editor() {
             {panel === "options" && <OptionsPanel />}
             {panel === "site" && <SitePanel />}
             {panel === "drawings" && <DrawingsPanel />}
+            {panel === "performance" && <PerformancePanel />}
           </div>
         </aside>
       </div>

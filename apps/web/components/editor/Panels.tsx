@@ -6,6 +6,8 @@ import { computeKpis, evaluateRules, getRulePack, KPI_DEFS, formatKpi, kpiValue,
 import { ringArea } from "@saturn/geometry";
 import { generateOptions } from "@/lib/generate";
 import { fetchOsmContext } from "@/lib/providers/context";
+import { fetchTerrain } from "@/lib/providers/terrain";
+import { slopeStats } from "@saturn/geometry";
 import { Btn, Chip, Divider, Field, Input, Num, Select, StatTile } from "@/components/ui";
 import { StreetSectionsPanel, UnderlaysPanel } from "./SiteFeaturePanels";
 import { UnitsPanel } from "./UnitsPanel";
@@ -226,7 +228,11 @@ export function SitePanel() {
         <Num label="Origin lon" value={s.origin.lon} step={0.0001} onChange={(v) => v !== undefined && setSite((ss) => { ss.origin.lon = v; })} />
         <Num label="Context radius (m)" value={s.context_radius_m} step={50} onChange={(v) => v && setSite((ss) => { ss.context_radius_m = v; })} />
       </div>
-      <Btn variant="ghost" size="sm" className="w-full" onClick={fetchCtx}><Dl size={12} /> Fetch context (OSM)</Btn>
+      <div className="flex gap-1.5">
+        <Btn variant="ghost" size="sm" className="flex-1" onClick={fetchCtx}><Dl size={12} /> Fetch context (OSM)</Btn>
+        <Btn variant="ghost" size="sm" className="flex-1" onClick={async () => { setStatus("Fetching terrain tiles…"); try { const t = await fetchTerrain(s.origin, Math.min(600, s.context_radius_m + 100)); setSite((ss) => { ss.terrain = t; }); const st = slopeStats(t); setStatus(`Terrain ${t.cols}×${t.rows} @ ${t.cell_m} m · max slope ${st.max_pct.toFixed(0)} %`); } catch (e) { setStatus(`Terrain failed: ${(e as Error).message}`); } }}><Dl size={12} /> Fetch terrain</Btn>
+      </div>
+      {s.terrain && <div className="flex items-center justify-between text-[11px] text-ink-2"><span>Terrain loaded ({s.terrain.cols}×{s.terrain.rows} @ {s.terrain.cell_m} m)</span><button className="text-ink-3 hover:text-danger" onClick={() => setSite((ss) => { ss.terrain = undefined; })}>remove</button></div>}
       {status && <div className="text-[11px] text-ink-2">{status}</div>}
       <Divider />
       <div className="flex gap-2">
@@ -239,7 +245,7 @@ export function SitePanel() {
       <StreetSectionsPanel />
       <Divider />
       <UnderlaysPanel />
-      <div className="text-[10.5px] text-ink-3">Terrain is flat in this build; elevation tiles arrive in a later phase.</div>
+      <div className="text-[10.5px] text-ink-3">Terrain comes from AWS Terrain Tiles (30 m SRTM-class data, ~5 m pixels). Buildings sit at the ground level of their footprint centre.</div>
     </div>
   );
 }

@@ -2,29 +2,38 @@
 
 *Updated 2026-11-04.*
 
-## Done (Phase 0 + Phase 1 core)
+## Done
 
-- Monorepo: pnpm workspaces, shared TypeScript config, vitest.
-- `packages/geometry`: polygon maths, Clipper-based offsets/booleans, per-edge setback envelope, geo conversions, triangulation. 8 tests.
-- `packages/model`: zod project schema (site, zoning, options, buildings, storeys, units, parking), KPI engine (20 KPIs), safe expression evaluator, rule engine with built-in geometric checks, generic international rule pack. 7 tests.
-- `apps/web` (Next.js 15, React Three Fiber, MapLibre):
-  - Dashboard with browser-stored projects, sample project, JSON import/export.
-  - New project: address search, map click for origin, parcel drawn on the map, OpenStreetMap context (buildings with heights, streets with traffic defaults).
-  - 3D editor: draw polygon/rectangle buildings with snapping, select/move by dragging, storey handle, keyboard shortcuts, undo/redo, design options.
-  - Live KPIs, zoning parameter panel with per-edge setbacks, compliance panel with autofix (clamp height/storeys, trim to envelope), buildable envelope overlay.
-  - Massing generator: aligned/rotated bars, perimeter block, L-block, auto-reduced to pass rules, ranked by target GFA and compactness.
-  - Exports: OBJ, DXF, Excel (KPIs per option, building and storey schedules, compliance, zoning), project JSON.
-- `packages/analyses`: NOAA solar position, day sampling, ground/façade samplers, Tregenza 145-patch sky, VSC. 7 tests.
-- Analyses in the editor (in-browser, BVH ray casting):
-  - Real-time shadows for any date and hour (sun-position-driven light).
-  - Sun hours on ground and façades for a chosen date, heatmap overlay, stats.
-  - Façade daylight potential (Vertical Sky Component, CIE overcast sky) on design buildings and nearby neighbours, overlay, share of façade below 27 %.
-  - Results flagged stale when the model changes; every result carries a "comparative, not certified" label.
-- Verified by headless Playwright runs: sample load, draw, storey change, generate, export, sun hours, daylight, no console errors.
+**Platform**
+- pnpm monorepo: `apps/web` (Next.js 15, React Three Fiber, MapLibre), `packages/geometry`, `packages/model`, `packages/analyses`. 49 unit tests.
+- Design system after the reference boards: dark dotted field, frosted glass panels, orange accent with teal data colours, stat tiles, pill toolbars, callouts on the model, red highlight for code violations.
 
-## Not yet (see `04-build-plan.md`)
+**Site**
+- Map-based project creation (address search, origin click, parcel outline), OpenStreetMap context (buildings with heights, streets with traffic defaults), terrain from AWS Terrain Tiles (buildings placed on ground level), image underlays with placement, street sections (8 band types, presets, swept along streets).
 
-Terrain, image underlays, street sections, unit layouts and parking generator, views analysis, wind, noise, comfort/energy, daylight factor per room, drawings, IFC/3DM, accounts, billing, collaboration.
+**Model and design**
+- Structured model (site → options → buildings → storeys → units/cores, parking). Draw polygon/rectangle buildings with snapping, drag to move, storey handle, undo/redo, options with duplicate and compare.
+- Massing generator (aligned/rotated bars, perimeter, L-block) that reduces storeys until rules pass.
+- Unit layout generator (corridor strip model, cores by travel distance) with unit-mix optimiser; basement and surface parking planners.
+
+**KPIs and compliance**
+- 20 live KPIs; rule engine with safe expressions and geometric checks; generic international pack (height, storeys, setbacks per edge, FAR, coverage, OSR, uses, parking, minimum unit area); autofix actions.
+
+**Analyses** (see `06-analysis-methods.md`)
+- Shadows, sun hours, façade daylight potential (VSC), views, traffic noise (Lden/Lnight, quiet side), wind comfort (2D LBM, Lawson classes), daylight factor per unit, stormwater, free-running comfort and energy (5R1C with EPW or synthetic climate).
+
+**Outputs**
+- Drawings: site plan, floor plans with units, elevations, sections (A3 SVG/PDF with title block and KPIs).
+- Exports: IFC4 (validated with IfcOpenShell: 0 schema errors), dotBIM, glTF, OBJ, DXF, Excel, project JSON, PNG snapshot.
+- Read-only share link (project compressed into the URL; no server needed).
+
+## Not yet (needs a backend deployment)
+
+Accounts and organisations, billing and floating seats, cloud project storage, real-time collaboration and comments, SSO. The schema and UI are ready for these; see `02-spec-sheet.md` M1/M12 and `04-build-plan.md` Phase 2/4. Rhino 3DM export (use OBJ/IFC meanwhile) and WebXR VR (use the glTF export in a headset browser) are also pending.
+
+## Verification
+
+Headless Playwright runs exercise: sample load, draw, storey change, generate options, unit layout, parking, sun hours, daylight, views, noise, wind, thermal run, drawings preview, IFC/dotBIM/glTF/PDF download. No console errors. The live map and OSM/terrain fetches could not be exercised from the build sandbox (network policy) and should be tried in a normal browser.
 
 ## Run locally
 

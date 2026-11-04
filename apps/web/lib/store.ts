@@ -19,7 +19,8 @@ interface EditorState {
   showEnvelope: boolean;
   showContext: boolean;
   showUnits: boolean;
-  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site" | "drawings";
+  readonly: boolean;
+  panel: "kpi" | "compliance" | "zoning" | "building" | "options" | "site" | "drawings" | "performance";
 
   load: (p: Project) => void;
   mutate: (fn: (p: Project) => void, opts?: { history?: boolean }) => void;
@@ -53,7 +54,7 @@ const palette = ["#e3e6ea", "#c9ced6", "#f0e6dc", "#d7dde6", "#e8ddd0", "#cfd6de
 
 export const useEditor = create<EditorState>((set, get) => ({
   project: null, selectedId: null, tool: "select", draft: [], hover: null, past: [], future: [],
-  showEnvelope: true, showContext: true, showUnits: true, panel: "kpi",
+  showEnvelope: true, showContext: true, showUnits: true, readonly: false, panel: "kpi",
 
   load: (p) => set({ project: p, past: [], future: [], selectedId: null, draft: [] }),
 
@@ -64,7 +65,7 @@ export const useEditor = create<EditorState>((set, get) => ({
     fn(next);
     next.updated_at = new Date().toISOString();
     const opt = next.options.find((o) => o.id === next.active_option_id); if (opt) opt.updated_at = next.updated_at;
-    saveProject(next);
+    if (!get().readonly) saveProject(next);
     set((s) => ({ project: next, past: opts?.history === false ? s.past : [...s.past.slice(-100), before], future: opts?.history === false ? s.future : [] }));
   },
 

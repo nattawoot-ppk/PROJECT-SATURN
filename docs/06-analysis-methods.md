@@ -1,0 +1,22 @@
+# Analysis methods and validation status
+
+Every analysis in Saturn is an early-stage comparative tool, labelled as such in the interface. This page records the method behind each one, its inputs, and what has (and has not) been validated. Update it whenever an engine changes.
+
+| Analysis | Method | Inputs | Outputs | Validation so far | Known limits |
+|---|---|---|---|---|---|
+| Sun position / shadows | NOAA solar position algorithm (Meeus simplified) | site lat/lon, date, hour | sun vector, real-time shadows | Unit tests: Bangkok equinox noon altitude 76–77°, Oslo winter noon 6–8°, day length ≈ 12 h at low latitude | ±0.01° algorithm accuracy; no refraction |
+| Sun hours | Ray casting from ground (2 m) and façade (3 m) samples toward sun vectors every 20 min; BVH over design + context + flat ground | model, date | hours per sample, ground heatmap, façade quads, stats | Internal consistency only (unobstructed samples reach full day length) | Flat terrain unless terrain loaded (not yet used as occluder); direct sun only |
+| Façade daylight potential | Vertical Sky Component: Tregenza 145-patch sky, CIE overcast luminance, visibility by ray casting | model | VSC % per façade sample, share below 27 %, neighbour impact | Unit tests: unobstructed vertical 39–40 %, horizontal 100 %; obstruction reduces | Not climate-based; no reflections |
+| Daylight factor per unit | BRE average DF = T·Aw·θ/(A(1−R²)) with θ from façade VSC near each unit's exterior edges, glazing ratio user-set | VSC result, unit layouts | DF % per unit, pass share vs threshold | Unit test: typical 4×5 m room ≈ 1.3–2.2 % | Average DF only; no room depth criterion; assumes uniform glazing |
+| Views | Hemisphere band ray casting (−5°…+25°, ±90° azimuth) weighted toward the façade normal; obstruction within 300 m | model | openness % per façade sample | Internal consistency | No view-quality weighting (sea, park) yet |
+| Traffic noise | RLS-90 emission (hourly flow, heavy share, speed) → line-source divergence from 25 m reference, air absorption, Maekawa barrier screening over buildings, +3 dB façade reflection; day/evening/night shares 6 %/4 %/1.1 % of AADT; Lden and Lnight | streets with traffic, model | Lden/Lnight per façade receiver per storey, ground Lden grid, quiet-side and bedroom verdicts vs NO/SE/DK/WHO limits | Unit tests: 3 dB per doubling of distance from a long road, >10 dB screening behind a block | Not CNOSSOS-EU; no ground effect, no multiple reflections, no rail/air/industry |
+| Wind | 2D lattice-Boltzmann (D3Q9 BGK) at pedestrian level, buildings as bounce-back obstacles, equilibrium inlet/outlet, 12 directions weighted by a wind rose, speed ratio × reference speed → Lawson LDDC classes | model, wind rose, reference speed | comfort class map, speed-up statistics | Unit tests: open field ratio ≈ 1, wake < 0.8, corner speed-up > 1.05 | 2D: no flow over roofs, no vertical mixing, laminar-scale viscosity; not benchmarked against AIJ cases yet (planned) |
+| Comfort & energy | ISO 13790 5R1C hourly model, free-running with natural ventilation when warm, EN 16798-1 Cat II adaptive band (0.33·Trm+18.8 ± 3 K), occupied 07–22; conditioned run with 20/26 °C set points for demand | building geometry, glazing ratio, U-values, g-value, thermal mass, EPW weather (or synthetic latitude-based climate) | thermal autonomy %, overheating/underheating hours, heating and cooling kWh/m²·a, peaks, monthly means | Unit tests: tropical climate cooling-dominated, cold climate heating-dominated, more glazing → more cooling | Single zone per building; crude solar gain split; synthetic climate is approximate |
+| Stormwater | Rational method with runoff coefficients (roof 0.95, paving 0.9, green 0.25); detention = (peak − allowed release) × duration | surfaces from model, storm intensity, allowed release | impervious %, peak runoff, detention volume, annual runoff | Unit test on hand-calculated case | No routing or infiltration modelling |
+
+## Validation backlog
+
+1. Sun hours and VSC against Ladybug/Radiance on three reference sites.
+2. Wind against AIJ cases A–F; publish hit rate within ±30 % speed ratio.
+3. Noise against NoiseModelling (CNOSSOS-EU) on three street scenarios; target within 3 dB.
+4. Comfort/energy against EnergyPlus on BESTEST-like boxes; target within 15 % annual demand.

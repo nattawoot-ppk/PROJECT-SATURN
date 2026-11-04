@@ -3,7 +3,7 @@ import { useMemo, useEffect } from "react";
 import * as THREE from "three";
 import { useAnalysis } from "@/lib/analysisStore";
 import { useEditor } from "@/lib/store";
-import { heatColor, sunPosition, type Sample } from "@saturn/analyses";
+import { heatColor, sunPosition, LAWSON, type Sample } from "@saturn/analyses";
 
 /** Directional light placed at the sun for the selected date/hour. */
 export function SunLight() {
@@ -52,6 +52,20 @@ export function ViewsOverlay() {
   useEffect(() => () => { mesh?.geometry.dispose(); (mesh?.material as THREE.Material | undefined)?.dispose(); }, [mesh]);
   if (!v || overlay !== "views" || !mesh) return null;
   return <primitive object={mesh} />;
+}
+
+/** Wind comfort: ground heatmap of Lawson classes. */
+export function WindOverlay() {
+  const w = useAnalysis((s) => s.wind); const overlay = useAnalysis((s) => s.overlay);
+  const tex = useMemo(() => {
+    if (!w) return null; const { cols, rows, comfort, ratio } = w; const data = new Uint8Array(cols * rows * 4);
+    for (let i = 0; i < cols * rows; i++) { if (ratio[i]! < 0) { data[i * 4 + 3] = 0; continue; } const c = new THREE.Color(LAWSON[comfort[i]!]!.color); data[i * 4] = c.r * 255; data[i * 4 + 1] = c.g * 255; data[i * 4 + 2] = c.b * 255; data[i * 4 + 3] = 185; }
+    const t = new THREE.DataTexture(data, cols, rows, THREE.RGBAFormat); t.needsUpdate = true; t.magFilter = THREE.LinearFilter; return t;
+  }, [w]);
+  useEffect(() => () => tex?.dispose(), [tex]);
+  if (!w || overlay !== "wind" || !tex) return null;
+  const { cols, rows, minX, minY, cell } = w;
+  return <mesh position={[minX + (cols * cell) / 2, minY + (rows * cell) / 2, 0.07]}><planeGeometry args={[cols * cell, rows * cell]} /><meshBasicMaterial map={tex} transparent depthWrite={false} /></mesh>;
 }
 
 /** Traffic noise: façade Lden quads + ground Lden heatmap (45–75 dB). */

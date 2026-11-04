@@ -6,9 +6,11 @@ import { useEditor, activeOption } from "@/lib/store";
 import { extrudeRing } from "@/lib/extrude";
 import { computeEnvelope, buildingHeight, evaluateRules, getRulePack, type Building } from "@saturn/model";
 import { centroid, bounds, distPointRing, ringArea, type Ring } from "@saturn/geometry";
-import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay, NoiseOverlay } from "./SunOverlay";
+import { SunLight, SunOverlay, DaylightOverlay, ViewsOverlay, NoiseOverlay, WindOverlay } from "./SunOverlay";
 import { StreetSections, Underlays } from "./SiteFeatures";
 import { UnitTiles, ParkingMeshes } from "./UnitsAndParking";
+import { TerrainMesh } from "./Terrain";
+import { sampleHeight } from "@saturn/geometry";
 
 function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [number, number] {
   const cands: [number, number][] = [...(parcel ?? []), ...env.flat()];
@@ -19,10 +21,12 @@ function snap(pt: [number, number], parcel: Ring | undefined, env: Ring[]): [num
 function BuildingMesh({ b, selected, violation }: { b: Building; selected: boolean; violation: boolean }) {
   const select = useEditor((s) => s.select);
   const tool = useEditor((s) => s.tool);
+  const terrain = useEditor((s) => s.project?.site.terrain);
+  const base = useMemo(() => { if (!terrain) return 0; const c = centroid(b.footprint); return sampleHeight(terrain, c[0], c[1]); }, [terrain, b.footprint]);
   const geoms = useMemo(() => {
-    let z = 0;
-    return b.storeys.map((s) => { const g = extrudeRing(s.footprint ?? b.footprint, z, z + s.height_m); z += s.height_m; return { g, z0: z - s.height_m, z1: z, fp: s.footprint ?? b.footprint }; });
-  }, [b]);
+    let z = base;
+    return b.storeys.map((s) => { const g = extrudeRing(s.footprint ?? b.footprint, z - (z === base ? 0.6 : 0), z + s.height_m); z += s.height_m; return { g, z0: z - s.height_m, z1: z, fp: s.footprint ?? b.footprint }; });
+  }, [b, base]);
   useEffect(() => () => geoms.forEach((x) => x.g.dispose()), [geoms]);
   const color = violation ? "#ff3b3b" : b.color ?? "#d9dde3";
   const showUnits = useEditor((s) => s.showUnits);
@@ -59,7 +63,7 @@ function BuildingMesh({ b, selected, violation }: { b: Building; selected: boole
           <Line points={[...x.fp, x.fp[0]!].map(([px, py]) => [px, py, x.z1 + 0.01] as [number, number, number])} color={selected ? "#ff5a1f" : violation ? "#ff7a7a" : "#2a2f36"} lineWidth={selected ? 1.5 : 0.7} />
         </group>
       ))}
-      <Html position={[top[0], top[1], h + 2.5]} center distanceFactor={220} zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
+      <Html position={[top[0], top[1], base + h + 2.5]} center distanceFactor={220} zIndexRange={[5, 0]} style={{ pointerEvents: "none" }}>
         <div className={`whitespace-nowrap rounded-full border px-2.5 py-1 text-[11px] font-medium shadow-lg backdrop-blur-md ${violation ? "border-red-400/60 bg-red-500/20 text-red-100" : selected ? "border-orange-400/70 bg-orange-500/20 text-orange-50" : "border-white/15 bg-black/55 text-white/85"}`}>
           <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${violation ? "bg-red-400" : "bg-orange-400"}`} />{b.name} · {b.storeys.length} st · {Math.round(gfa).toLocaleString()} m²
         </div>
@@ -145,7 +149,8 @@ function DraftPreview() {
 
 function ContextMeshes() {
   const project = useEditor((s) => s.project); const show = useEditor((s) => s.showContext);
-  const geoms = useMemo(() => (project?.site.context_buildings ?? []).map((c) => extrudeRing(c.footprint, 0, c.height_m)), [project?.site.context_buildings]);
+  const terrain = project?.site.terrain;
+  const geoms = useMemo(() => (project?.site.context_buildings ?? []).map((c) => { const ct = centroid(c.footprint); const z0 = terrain ? sampleHeight(terrain, ct[0], ct[1]) : 0; return extrudeRing(c.footprint, z0 - 0.6, z0 + c.height_m); }), [project?.site.context_buildings, terrain]);
   useEffect(() => () => geoms.forEach((g) => g.dispose()), [geoms]);
   if (!show) return null;
   return <group>{geoms.map((g, i) => <mesh key={i} geometry={g} castShadow receiveShadow><meshStandardMaterial color="#3a4047" roughness={1} /></mesh>)}</group>;
@@ -201,6 +206,7 @@ export default function Scene3D() {
       <hemisphereLight args={["#cfd8e6", "#0d1014", 0.5]} />
       <Ground />
       <gridHelper args={[2000, 400, "#2a3038", "#1a1e25"]} rotation={[Math.PI / 2, 0, 0]} position={[0, 0, -0.01]} />
+      <TerrainMesh />
       <Underlays />
       <SiteOverlay />
       <ContextMeshes />
@@ -214,6 +220,7 @@ export default function Scene3D() {
       <DaylightOverlay />
       <ViewsOverlay />
       <NoiseOverlay />
+      <WindOverlay />
       <DraftPreview />
       <CameraRig />
     </Canvas>

@@ -1,6 +1,6 @@
 # PROJECT SATURN
 
-Early-phase building design platform (feature-parity target: spacio.ai). Phase 1 build in progress; see `docs/05-status.md`.
+Early-phase building design platform (feature-parity target: spacio.ai). Feature build complete through analyses, drawings and BIM export; backend services pending. See `docs/05-status.md`.
 
 ```bash
 pnpm install
@@ -15,6 +15,7 @@ pnpm test
 | [docs/03-prd.md](docs/03-prd.md) | Product requirements: goals, personas, prioritised features, user stories, risks, open questions |
 | [docs/04-build-plan.md](docs/04-build-plan.md) | Phased delivery plan, effort, repo layout, first sprint |
 | [docs/05-status.md](docs/05-status.md) | What is built, what is not, how to run |
+| [docs/06-analysis-methods.md](docs/06-analysis-methods.md) | Method, inputs, validation status and limits of every analysis |
 | [docs/decisions/](docs/decisions/) | Architecture decision records |
 
-Layout: `apps/web` (Next.js editor), `packages/model` (schema, KPIs, rules), `packages/geometry` (polygon ops).
+Layout: `apps/web` (Next.js editor), `packages/model` (schema, KPIs, rules, generators), `packages/geometry` (polygon and terrain ops), `packages/analyses` (solar, sky, noise, wind, energy, water).

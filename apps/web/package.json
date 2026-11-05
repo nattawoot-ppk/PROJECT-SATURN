@@ -9,8 +9,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "test": "echo 'no web tests yet'",
-    "prebuild": "node -e \"require('fs').copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\"",
-    "predev": "node -e \"require('fs').copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\""
+    "prebuild": "node -e \"const f=require('fs');f.mkdirSync('public',{recursive:true});f.copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\"",
+    "predev": "node -e \"const f=require('fs');f.mkdirSync('public',{recursive:true});f.copyFileSync(require.resolve('rhino3dm/rhino3dm.wasm'),'public/rhino3dm.wasm')\""
   },
   "dependencies": {
     "@react-three/drei": "^10.7.9",
